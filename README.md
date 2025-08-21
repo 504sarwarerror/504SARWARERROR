@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/welcome.png"/>
+  <img src="ASSETS/PEEKIN.png"/>
   <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>  
   <img src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/ie_logo.gif" alt="Microsoft Internet Explorer" />
   <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>  
@@ -75,6 +75,58 @@
       </tr>
     </tbody>
   </table>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="2" style="text-align: center;">
+        <img src="ASSETS/WRITEUPS.png" style="width: 100%; max-width: 350px; object-fit: cover;" />
+      </th>
+
+  <th colspan="2" style="text-align: center;">
+        <img src="ASSETS/DONATE.png" style="width: 100%; max-width: 150px; object-fit: cover;" />
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; padding: 10px;">
+        <a href="">REDACTED</a>
+      </td>
+      <td style="vertical-align: top; padding: 10px;">
+        REDACTED REDACTED REDACTED REDACTED
+      </td>
+
+  <td style="vertical-align: top;" colspan="2" rowspan="3">
+        <div style="text-align: center;">
+          <div style="margin-top: 10px;">
+            <img src="ASSETS/QRC.jpg" style="width: 200px; height: auto;" alt="Donate QR Code" />
+          </div>
+        </div>
+      </td>
+    </tr>
+
+  <tr>
+      <td style="vertical-align: top; padding: 10px;">
+        <a href="">REDACTED</a>
+      </td>
+      <td style="vertical-align: top; padding: 10px;">
+        REDACTED REDACTED REDACTED REDACTED
+      </td>
+    </tr>
+
+  <tr>
+      <td style="vertical-align: top; padding: 10px;">
+        <a href="">REDACTED</a>
+      </td>
+      <td style="vertical-align: top; padding: 10px;">
+        REDACTED REDACTED REDACTED REDACTED
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
   
   <img height="200" src="https://raw.githubusercontent.com/sarwaaaar/sarwaaaar/output/snake.svg" />
 </div> 
