@@ -101,6 +101,7 @@
         <div style="text-align: center;">
           <div style="margin-top: 10px;">
             <img src="ASSETS/QRC.jpg" style="width: 200px; height: auto;" alt="Donate QR Code" />
+            <img src="ASSETS/QRCETH.jpg" style="width: 200px; height: auto;" alt="Donate QR Code" />
           </div>
         </div>
       </td>
