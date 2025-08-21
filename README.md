@@ -84,7 +84,7 @@
       </th>
 
   <th colspan="2" style="text-align: center;">
-        <img src="ASSETS/DONATE.png" style="width: 150px; object-fit: cover;" />
+        <img src="ASSETS/DONATE.png" style="width: 100%; max-width: 150px; object-fit: cover;" />
       </th>
     </tr>
   </thead>
