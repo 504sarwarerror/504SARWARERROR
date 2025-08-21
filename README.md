@@ -99,9 +99,10 @@
 
   <td style="vertical-align: top;" colspan="2" rowspan="3">
         <div style="text-align: center;">
-          <div style="margin-top: 10px;">
-            <img src="ASSETS/QRC.jpg" style="width: 200px; height: auto;" alt="Donate QR Code" />
-          </div>
+<div style="margin-top: 10px; display: flex; gap: 10px;">
+  <img src="ASSETS/QRC.jpg" style="width: 160px; height: auto;" alt="Donate QR Code" />
+  <img src="ASSETS/QRCETH.jpg" style="width: 160px; height: auto;" alt="Donate QR Code" />
+</div>
         </div>
       </td>
     </tr>
