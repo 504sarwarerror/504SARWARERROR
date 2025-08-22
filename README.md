@@ -91,10 +91,10 @@
   <tbody>
     <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="">REDACTED</a>
+        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-        REDACTED REDACTED REDACTED REDACTED
+a basic guide to diving into malware development
       </td>
 
   <td style="vertical-align: top;" colspan="2" rowspan="3">
