@@ -91,7 +91,7 @@
   <tbody>
     <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/!!!-Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
+        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/(!)-Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
 compilation of write-ups about malware development
