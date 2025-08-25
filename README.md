@@ -91,10 +91,10 @@
   <tbody>
     <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
+        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/!!!-Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-a basic guide to diving into malware development
+compilation of write-ups about malware development
       </td>
 
   <td style="vertical-align: top;" colspan="2" rowspan="3">
@@ -109,25 +109,21 @@ a basic guide to diving into malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="">REDACTED</a>
+        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Basic's-of-Malware">Basic's of Malware</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-        REDACTED REDACTED REDACTED REDACTED
+        the basic principles when creating malware
       </td>
     </tr>
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="">REDACTED</a>
+        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-behind-it">Userland Rootkit's</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-        REDACTED REDACTED REDACTED REDACTED
+how a rootkit works and the code behind it
       </td>
     </tr>
   </tbody>
 </table>
-
-
-  
-  <img height="200" src="https://raw.githubusercontent.com/sarwaaaar/sarwaaaar/output/snake.svg" />
 </div> 
