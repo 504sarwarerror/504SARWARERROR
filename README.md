@@ -91,7 +91,7 @@
   <tbody>
     <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/(!)-Sarwar's-Guide-to-Creating-Malware">Sarwar's Guide to Creating Malware</a>
+        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki">Sarwar's Guide to Creating Malware</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
 compilation of write-ups about malware development
@@ -109,7 +109,7 @@ compilation of write-ups about malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Basic's-of-Malware">Basic's of Malware</a>
+        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat">Discord C2 Server and a Rat</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
         the basic principles when creating malware
@@ -118,7 +118,7 @@ compilation of write-ups about malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/505sarwarerror/505SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-behind-it">Userland Rootkit's</a>
+        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it">Userland Rootkit's and the Code Behind it</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
 how a rootkit works and the code behind it
