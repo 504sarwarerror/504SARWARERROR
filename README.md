@@ -112,7 +112,7 @@ compilation of write-ups about malware development
         <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat">Discord C2 Server and a Rat</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-        the basic principles when creating malware
+        a reverse shell for discord bots
       </td>
     </tr>
 
