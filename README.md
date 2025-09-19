@@ -109,10 +109,10 @@ compilation of write-ups about malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat">Discord C2 Server and a Rat</a>
+        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills">ATM Jackpotting Spitting Out Bills</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-        a reverse shell with the help of discord bots
+        when an atm spits out all its money to you
       </td>
     </tr>
 
