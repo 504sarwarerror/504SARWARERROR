@@ -3,9 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>PEEKIN' — Retro Info Page</title>
+    <title>SARWAR "BARTMOSS"</title>
     <style>
-      /* --- Base --- */
       html,
       body {
         height: 100%;
@@ -18,7 +17,6 @@
         margin: 0;
       }
 
-      /* container keeps central column */
       .container {
         max-width: 900px;
         margin: 0 auto;
@@ -34,7 +32,6 @@
         vertical-align: middle;
       }
 
-      /* Peekin banner full width of container */
       .peekin {
         width: 100%;
         height: auto;
@@ -51,13 +48,12 @@
         max-height: 48px;
       }
 
-      /* --- Tables: unified width & predictable columns --- */
       .full-table {
         width: 100%;
         max-width: 100%;
         margin-top: 12px;
         border-collapse: collapse;
-        table-layout: fixed; /* ensures equal behaviour across tables */
+        table-layout: fixed;
         box-sizing: border-box;
       }
       .full-table th,
@@ -75,20 +71,17 @@
         font-weight: bold;
       }
 
-      /* images inside table cells scale to cell */
       .img-cell img {
         display: block;
         width: 100%;
         height: auto;
         object-fit: cover;
       }
-      /* For smaller GIFs that should be limited by height */
       .img-cell .gif {
         max-height: 180px;
         width: 100%;
       }
 
-      /* About box */
       .about {
         margin-top: 18px;
         padding: 12px;
@@ -108,7 +101,6 @@
         text-decoration: underline;
       }
 
-      /* Donate image column (centered and larger if needed) */
       .donate-images {
         display: flex;
         flex-direction: column;
@@ -121,10 +113,9 @@
         display: block;
       }
 
-      /* Responsive tweaks: keep layout tidy on narrow screens */
       @media (min-width: 800px) {
         .donate-images {
-          flex-direction: row; /* side-by-side on larger screens */
+          flex-direction: row;
           justify-content: center;
         }
       }
@@ -132,7 +123,6 @@
   </head>
   <body>
     <div class="container">
-      <!-- Title area with PEEKIN full width and the other small images underneath -->
       <div class="top-center">
         <img class="peekin" src="ASSETS/PEEKIN.png" alt="PEEKIN" />
         <div class="small-icons">
@@ -150,7 +140,6 @@
           />
         </div>
 
-        <!-- CODING MALWARE / BREAKING STUFF table (now full width with others) -->
         <table class="full-table">
           <thead>
             <tr>
@@ -160,7 +149,6 @@
           </thead>
         </table>
 
-        <!-- Two-column GIF table -->
         <table class="full-table">
           <tbody>
             <tr>
@@ -183,7 +171,6 @@
         </table>
       </div>
 
-      <!-- About (already above projects) -->
       <div class="about">
         <h2>About</h2>
         <p>
@@ -198,7 +185,6 @@
         </p>
       </div>
 
-      <!-- Socials Table -->
       <table class="full-table">
         <tbody>
           <tr>
@@ -212,7 +198,6 @@
         </tbody>
       </table>
 
-      <!-- Projects table (full width like others) -->
       <table class="full-table">
         <thead>
           <tr>
@@ -291,7 +276,6 @@
         </tbody>
       </table>
 
-      <!-- Writeups + Donate -->
       <table class="full-table" style="margin-top: 14px">
         <thead>
           <tr>
