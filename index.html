@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PEEKIN' — Retro Info Page</title>
+    <style>
+      /* --- Base --- */
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: #ffffff;
+        color: #000000;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      /* container keeps central column */
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+
+      .top-center {
+        text-align: center;
+      }
+      .top-center img {
+        vertical-align: middle;
+      }
+
+      /* Peekin banner full width of container */
+      .peekin {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 8px auto;
+      }
+
+      .small-icons {
+        margin-top: 8px;
+      }
+      .small-icons img {
+        margin: 0 8px;
+        vertical-align: middle;
+        max-height: 48px;
+      }
+
+      /* --- Tables: unified width & predictable columns --- */
+      .full-table {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 12px;
+        border-collapse: collapse;
+        table-layout: fixed; /* ensures equal behaviour across tables */
+        box-sizing: border-box;
+      }
+      .full-table th,
+      .full-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        vertical-align: middle;
+        overflow: hidden;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+      .full-table thead td,
+      .full-table thead th {
+        background: #f0f0f0;
+        font-weight: bold;
+      }
+
+      /* images inside table cells scale to cell */
+      .img-cell img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+      /* For smaller GIFs that should be limited by height */
+      .img-cell .gif {
+        max-height: 180px;
+        width: 100%;
+      }
+
+      /* About box */
+      .about {
+        margin-top: 18px;
+        padding: 12px;
+        border: 1px solid #000;
+        background: #fafafa;
+      }
+      .about h2 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+      }
+      .about p {
+        margin: 0;
+      }
+
+      a {
+        color: #000;
+        text-decoration: underline;
+      }
+
+      /* Donate image column (centered and larger if needed) */
+      .donate-images {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .donate-images img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Responsive tweaks: keep layout tidy on narrow screens */
+      @media (min-width: 800px) {
+        .donate-images {
+          flex-direction: row; /* side-by-side on larger screens */
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Title area with PEEKIN full width and the other small images underneath -->
+      <div class="top-center">
+        <img class="peekin" src="ASSETS/PEEKIN.png" alt="PEEKIN" />
+        <div class="small-icons">
+          <img
+            src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/ie_logo.gif"
+            alt="Microsoft Internet Explorer"
+          />
+          <img
+            src="https://raw.githubusercontent.com/fnky/fnky/fnky/img/smile.gif"
+            alt="SMILEY"
+          />
+          <img
+            src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/noframes.gif"
+            alt="noframes"
+          />
+        </div>
+
+        <!-- CODING MALWARE / BREAKING STUFF table (now full width with others) -->
+        <table class="full-table">
+          <thead>
+            <tr>
+              <td><b>CODING MALWARE</b></td>
+              <td><b>BREAKING STUFF</b></td>
+            </tr>
+          </thead>
+        </table>
+
+        <!-- Two-column GIF table -->
+        <table class="full-table">
+          <tbody>
+            <tr>
+              <td class="img-cell">
+                <img
+                  class="gif"
+                  src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGpzZ2plZzQzNWtiOGlodnFhcGRiNW5rbXdqY3F5dHhnOGQyY3hiaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5uCNrpW6oqPMuuNhRJ/giphy.gif"
+                  alt="coding malware gif"
+                />
+              </td>
+              <td class="img-cell">
+                <img
+                  class="gif"
+                  src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3NoODViMWwwODJlYWl1cWtqMDE3YXp5a2w5YWhmdWkwcTR1cHR2dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/huSDDCmMrDlEQ6efLN/giphy.gif"
+                  alt="breaking stuff gif"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- About (already above projects) -->
+      <div class="about">
+        <h2>About</h2>
+        <p>
+          hey — i’m SARWAR, known in the cramped lights of backroom nets as
+          <b>BARTMOSS</b>. i solder code into the seams of operating systems,
+          whispering low-level tricks where userland never hears. i build slim,
+          nasty little tools that live under the hood: precise, efficient, and
+          bred for silence. i’m not here for glory; i’m here to understand the
+          machine and bend it where it never expected to be bent. call it
+          curiosity, call it craft — i call it the only honest way to learn how
+          the world really runs.
+        </p>
+      </div>
+
+      <!-- Socials Table -->
+      <table class="full-table">
+        <tbody>
+          <tr>
+            <td style="text-align: center">
+              <a href="https://github.com/504sarwarerror"><b>GitHub</b></a>
+            </td>
+            <td style="text-align: center">
+              <a href="https://discord.gg/aWeFF8cfAn"><b>Discord</b></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Projects table (full width like others) -->
+      <table class="full-table">
+        <thead>
+          <tr>
+            <td><b>Projects</b></td>
+            <td style="width: 80px"><b>Stars</b></td>
+            <td style="width: 80px"><b>Forks</b></td>
+            <td><b>Description</b></td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a href="https://github.com/sarwaaaar/rabids"><b>RABIDS</b></a>
+            </td>
+            <td>
+              <img
+                alt="Stars"
+                src="https://img.shields.io/github/stars/sarwaaaar/rabids?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              <img
+                alt="Forks"
+                src="https://img.shields.io/github/forks/sarwaaaar/rabids?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              modular malware framework to build custom payloads, designed for
+              advanced adversary simulation and malware research
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://github.com/sarwaaaar/savant"><b>SAVANT</b></a>
+            </td>
+            <td>
+              <img
+                alt="Stars"
+                src="https://img.shields.io/github/stars/sarwaaaar/savant?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              <img
+                alt="Forks"
+                src="https://img.shields.io/github/forks/sarwaaaar/savant?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              a rag model trained on malware sample, it is designed to generate
+              new malware
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://github.com/sarwaaaar/blackwall"
+                ><b>BLACKWALL</b></a
+              >
+            </td>
+            <td>
+              <img
+                alt="Stars"
+                src="https://img.shields.io/github/stars/sarwaaaar/blackwall?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              <img
+                alt="Forks"
+                src="https://img.shields.io/github/forks/sarwaaaar/blackwall?style=flat-square&labelColor=343b41"
+              />
+            </td>
+            <td>
+              curated repository of malware samples preserved for research and
+              analysis
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Writeups + Donate -->
+      <table class="full-table" style="margin-top: 14px">
+        <thead>
+          <tr>
+            <th colspan="2" style="text-align: center">
+              <img
+                src="ASSETS/WRITEUPS.png"
+                style="width: 100%; max-width: 350px; object-fit: cover"
+              />
+            </th>
+            <th colspan="2" style="text-align: center">
+              <img
+                src="ASSETS/DONATE.png"
+                style="width: 100%; max-width: 150px; object-fit: cover"
+              />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="vertical-align: top; padding: 10px">
+              <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki"
+                >Sarwar's Guide to Creating Malware</a
+              >
+            </td>
+            <td style="vertical-align: top; padding: 10px">
+              compilation of write-ups about malware development
+            </td>
+            <td style="vertical-align: top" colspan="2" rowspan="3">
+              <div style="text-align: center">
+                <div class="donate-images">
+                  <img
+                    src="ASSETS/QRC.jpg"
+                    style="width: 160px; height: auto"
+                    alt="Donate QR Code"
+                  />
+                  <img
+                    src="ASSETS/QRCETH.jpg"
+                    style="width: 160px; height: auto"
+                    alt="Donate QR Code"
+                  />
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top; padding: 10px">
+              <a
+                href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills"
+                >ATM Jackpotting Spitting Out Bills</a
+              >
+            </td>
+            <td style="vertical-align: top; padding: 10px">
+              when an atm spits out all its money to you
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top; padding: 10px">
+              <a
+                href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it"
+                >Userland Rootkit's and the Code Behind it</a
+              >
+            </td>
+            <td style="vertical-align: top; padding: 10px">
+              how a rootkit works and the code behind it
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
