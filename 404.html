@@ -245,6 +245,7 @@
       let lastMessageContent = "";
       const MESSAGE_COOLDOWN = 2000;
       const MAX_MESSAGE_LENGTH = 500;
+      const MAX_USERNAME_LENGTH = 25;
       const SPAM_WINDOW = 30000;
       const MAX_MESSAGES_IN_WINDOW = 10;
       let messageTimestamps = [];
@@ -368,7 +369,12 @@
         meta.className = "meta";
         const usernameSpan = document.createElement("span");
         usernameSpan.className = "username";
-        usernameSpan.textContent = item.username || "Anonymous";
+        let username = item.username || "Anonymous";
+        if (username.length > MAX_USERNAME_LENGTH) {
+          username = username.substring(0, MAX_USERNAME_LENGTH) + "...";
+        }
+        usernameSpan.textContent = username;
+
         usernameSpan.style.setProperty(
           "--user-gradient",
           getGradient(item.username || "Anon")
