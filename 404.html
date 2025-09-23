@@ -435,39 +435,42 @@
       }
 
       async function sendMessage() {
-        if (userTimeoutUntil > Date.now()) {
-          const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
-          console.warn(
-            `You are on a timeout for spamming. Please wait ${remaining} seconds.`
-          );
-          messageInput.placeholder = `Timeout for ${remaining}s...`;
-          return;
-        }
+        // [MODIFIED] The following block for spam timeout has been disabled.
+        // if (userTimeoutUntil > Date.now()) {
+        //   const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
+        //   console.warn(
+        //     `You are on a timeout for spamming. Please wait ${remaining} seconds.`
+        //   );
+        //   messageInput.placeholder = `Timeout for ${remaining}s...`;
+        //   return;
+        // }
         messageInput.placeholder = "Type a message...";
 
         const now = Date.now();
-        if (now - lastMessageTime < MESSAGE_COOLDOWN) {
-          console.warn(
-            "Rate limit exceeded. Please wait before sending another message."
-          );
-          return;
-        }
+        // [MODIFIED] The following block for message cooldown has been disabled.
+        // if (now - lastMessageTime < MESSAGE_COOLDOWN) {
+        //   console.warn(
+        //     "Rate limit exceeded. Please wait before sending another message."
+        //   );
+        //   return;
+        // }
 
         messageTimestamps = messageTimestamps.filter(
           (timestamp) => now - timestamp < SPAM_WINDOW
         );
 
-        if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
-          console.warn(
-            "Spam detection: Too many messages sent. Timed out for 30 seconds."
-          );
-          userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
-          messageTimestamps = [];
-          return;
-        }
+        // [MODIFIED] The following block for outgoing spam detection has been disabled.
+        // if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
+        //   console.warn(
+        //     "Spam detection: Too many messages sent. Timed out for 30 seconds."
+        //   );
+        //   userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
+        //   messageTimestamps = [];
+        //   return;
+        // }
 
         let text = messageInput.value.trim();
-        if (!text) return;
+        if (!text) return; // This still prevents sending empty messages.
 
         const chaoticText = text.replace(
           /gif/i,
@@ -513,7 +516,9 @@
           { event: "INSERT", schema: "public", table: "messages" },
           (payload) => {
             const newUserMessage = payload.new;
-            if (newUserMessage.user === mySessionId) return;
+            // [MODIFIED] The following check, which prevents your own messages from appearing a second time, has been disabled.
+            // You will now see your own messages duplicated in the chat.
+            // if (newUserMessage.user === mySessionId) return;
 
             const now = Date.now();
             const userId = newUserMessage.user;
@@ -525,10 +530,11 @@
               (timestamp) => now - timestamp < SPAM_WINDOW
             );
 
-            if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
-              console.warn(`Hiding spam message from user: ${userId}`);
-              return;
-            }
+            // [MODIFIED] The following block for incoming spam detection has been disabled.
+            // if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
+            //   console.warn(`Hiding spam message from user: ${userId}`);
+            //   return;
+            // }
 
             allUserTimestamps[userId].push(now);
             addMessage(newUserMessage);
