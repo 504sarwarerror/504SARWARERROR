@@ -425,13 +425,26 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }
 
+      // Function to load messages from Supabase
       async function loadMessages() {
-        const { data } = await supabaseClient
-          .from("messages")
-          .select("*")
-          .order("created_at", { ascending: true })
-          .limit(50);
-        data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
+        try {
+          const { data, error } = await supabaseClient
+            .from("messages")
+            .select("*")
+            .order("created_at", { ascending: true });
+
+          if (error) {
+            console.error("Error loading messages from Supabase:", error);
+            // You might want to display a user-friendly error message here
+            return;
+          }
+          data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
+        } catch (e) {
+          console.error(
+            "Network or unexpected error during message loading:",
+            e
+          );
+        }
       }
 
       async function sendMessage() {
@@ -469,8 +482,7 @@
         //   return;
         // }
 
-        let text = messageInput.value.trim();
-        if (!text) return; // This still prevents sending empty messages.
+        let text = messageInput.value.trim(); // Message content will still be trimmed, but an empty string will now be sent.
 
         const chaoticText = text.replace(
           /gif/i,
@@ -481,6 +493,7 @@
           text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
         }
 
+        // Construct the message payload
         const messagePayload = {
           user: mySessionId,
           username: myUsername,
@@ -488,14 +501,23 @@
           created_at: new Date().toISOString(),
         };
 
-        const existingMessages = document.querySelectorAll(
-          `.msg[data-user-id="${mySessionId}"][data-content="${chaoticText}"]`
-        );
-        existingMessages.forEach((msg) => {
-          msg.remove();
-        });
-
-        await supabaseClient.from("messages").insert([messagePayload]);
+        // Attempt to insert the message into Supabase
+        try {
+          const { error } = await supabaseClient
+            .from("messages")
+            .insert([messagePayload]);
+          if (error) {
+            console.error("Error inserting message into Supabase:", error);
+            // You might want to display a user-friendly error message here
+            return; // Stop execution if insertion failed
+          }
+        } catch (e) {
+          console.error(
+            "Network or unexpected error during message insertion:",
+            e
+          );
+          return; // Stop execution if an unexpected error occurred
+        }
 
         addMessage(messagePayload, true);
         messageInput.value = "";
@@ -516,10 +538,8 @@
           { event: "INSERT", schema: "public", table: "messages" },
           (payload) => {
             const newUserMessage = payload.new;
-            // [MODIFIED] The following check, which prevents your own messages from appearing a second time, has been disabled.
-            // You will now see your own messages duplicated in the chat.
-            // if (newUserMessage.user === mySessionId) return;
-
+            // This prevents your own messages from appearing a second time.
+            if (newUserMessage.user === mySessionId) return;
             const now = Date.now();
             const userId = newUserMessage.user;
             if (!allUserTimestamps[userId]) {
