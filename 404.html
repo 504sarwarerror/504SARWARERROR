@@ -393,20 +393,17 @@
           '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
         );
 
-        await supabaseClient
-          .from("messages")
-          .insert([
-            { user: mySessionId, username: myUsername, content: chaoticText },
-          ]);
-        addMessage(
-          {
-            user: mySessionId,
-            username: myUsername,
-            content: chaoticText,
-            created_at: new Date(),
-          },
-          true
-        );
+        const messagePayload = {
+          user: mySessionId,
+          username: myUsername,
+          content: chaoticText,
+          created_at: new Date().toISOString(), // Include created_at
+        };
+
+        await supabaseClient.from("messages").insert([messagePayload]);
+
+        // Use the same payload for local display
+        addMessage(messagePayload, true);
         messageInput.value = "";
       }
 
