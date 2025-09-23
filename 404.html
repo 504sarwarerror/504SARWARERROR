@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Courier New", monospace;
+        background: #222;
+        color: #eee;
+        overflow: hidden;
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2hsN3c5MnJuanZoY3g4cnl3cDNlcDlzMW1qbHk0aDhnYWFzN3BndiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KLGfgLXAN6IE0/giphy.gif")
+          center center / cover no-repeat;
+        opacity: 0.2;
+        z-index: 0;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        z-index: 1;
+        position: relative;
+        padding: 12px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .messages {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 80px;
+        padding-top: 10px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .messages::-webkit-scrollbar {
+        display: none;
+      }
+
+      .msg {
+        padding: 10px 12px;
+        border-radius: 0;
+        max-width: 80%;
+        font-size: 14px;
+        position: relative;
+        overflow-wrap: break-word;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #fff;
+      }
+
+      .msg.mine {
+        background: rgba(255, 255, 255, 0.1);
+        align-self: flex-end;
+      }
+
+      .msg.mine-legacy {
+        background: #000;
+        color: #fff;
+        align-self: flex-end;
+        border-left: 3px solid #fff;
+      }
+
+      .msg img {
+        max-width: 120px;
+        max-height: 120px;
+        display: block;
+        margin-top: 6px;
+        border-radius: 0;
+      }
+
+      .meta {
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .username {
+        font-weight: bold;
+        display: inline-block;
+        background: var(--user-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientAnim 5s ease infinite;
+      }
+
+      @keyframes gradientAnim {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .composer-wrapper {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 0 10px 10px 10px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .composer {
+        display: flex;
+        width: 95%;
+        gap: 8px;
+      }
+
+      .composer input {
+        flex: 1;
+        padding: 12px;
+        border-radius: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #fff;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .composer button {
+        padding: 12px 18px;
+        border-radius: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .composer button:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      @media (max-width: 600px) {
+        .composer input {
+          font-size: 12px;
+          padding: 10px;
+        }
+        .composer button {
+          padding: 10px 14px;
+          font-size: 12px;
+        }
+        .msg {
+          font-size: 13px;
+          max-width: 90%;
+        }
+      }
+
+      .small-icons {
+        text-align: center;
+        padding: 5px 0;
+        position: relative;
+        z-index: 2;
+      }
+      .small-icons img {
+        margin: 0 8px;
+        vertical-align: middle;
+        max-height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="small-icons">
+        <img
+          src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/ie_logo.gif"
+          alt="Microsoft Internet Explorer"
+        />
+        <img
+          src="https://raw.githubusercontent.com/fnky/fnky/fnky/img/smile.gif"
+          alt="SMILEY"
+        />
+        <img
+          src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/noframes.gif"
+          alt="noframes"
+        />
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="composer-wrapper">
+        <div class="composer">
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="Type a message..."
+          />
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = "https://lvarvqcdfzrxqpzsckpa.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2YXJ2cWNkZnpyeHFwenNja3BhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2Mjk1OTMsImV4cCI6MjA3NDIwNTU5M30.8Lcd-dTXG5fpbxcAc4OOKnxefPdwAvWiNRfPbo4RbvQ";
+      const supabaseClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      const messagesEl = document.getElementById("messages");
+      const sendBtn = document.getElementById("sendBtn");
+      const messageInput = document.getElementById("messageInput");
+
+      let mySessionId = localStorage.getItem("chat_session_id");
+      if (!mySessionId) {
+        mySessionId = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("chat_session_id", mySessionId);
+      }
+
+      function randomUsername() {
+        const adjectives = [
+          "Retro",
+          "Ghost",
+          "Cyber",
+          "Pixel",
+          "Neon",
+          "Shadow",
+          "Glitch",
+          "Toxic",
+          "Quantum",
+          "Mad",
+          "Broken",
+          "Void",
+          "Viral",
+          "Feral",
+          "Cha0s",
+          "Null",
+          "Error",
+          "Fractured",
+        ];
+
+        const nouns = [
+          "Tiger",
+          "Falcon",
+          "Ninja",
+          "Dragon",
+          "Panda",
+          "Freak",
+          "Virus",
+          "Anon",
+          "Corpse",
+          "Reaper",
+          "Dumpster",
+          "Ghoul",
+          "Hack",
+          "Phantom",
+          "Wraith",
+          "Blob",
+          "Overload",
+        ];
+
+        const symbols = ["_", "-", "~", "!", "@", "#", "$", "%", "^", "∆", "?"];
+        const endings = ["404", "666", "XxX", "Ω", ".exe", "!!", "∞", "?!"];
+
+        const leetify = (word) =>
+          word.replace(
+            /[aAeEiIoOsStT]/g,
+            (c) =>
+              ({ a: "4", e: "3", i: "1", o: "0", s: "5", t: "7" }[
+                c.toLowerCase()
+              ] || c)
+          );
+
+        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        const sym = symbols[Math.floor(Math.random() * symbols.length)];
+        const end = endings[Math.floor(Math.random() * endings.length)];
+        const number = Math.floor(Math.random() * 999);
+
+        const style = Math.random();
+        let name;
+        if (style < 0.25) name = leetify(adj) + sym + leetify(noun) + end;
+        else if (style < 0.5)
+          name = adj.toUpperCase() + sym + noun.toLowerCase() + number;
+        else if (style < 0.75)
+          name = adj.toLowerCase() + noun.toUpperCase() + sym + end;
+        else
+          name =
+            leetify(adj) +
+            leetify(noun) +
+            symbols[Math.floor(Math.random() * symbols.length)] +
+            number;
+
+        return name;
+      }
+
+      for (let i = 0; i < 10; i++) {
+        console.log(randomUsername());
+      }
+
+      function generateGradientForUsername(username) {
+        let hash = 0;
+        for (let i = 0; i < username.length; i++)
+          hash = username.charCodeAt(i) + ((hash << 5) - hash);
+        const hue1 = Math.abs(hash % 360);
+        const hue2 = (hue1 + 72) % 360;
+        return `linear-gradient(90deg, hsl(${hue1}, 80%, 60%), hsl(${hue2}, 80%, 60%), hsl(${hue1}, 80%, 60%))`;
+      }
+
+      let myUsername =
+        localStorage.getItem("chat_username") || randomUsername();
+      localStorage.setItem("chat_username", myUsername);
+
+      const usernameGradients = {};
+      function getGradient(username) {
+        if (!usernameGradients[username])
+          usernameGradients[username] = generateGradientForUsername(username);
+        return usernameGradients[username];
+      }
+
+      function addMessage(item, mine = false) {
+        const outer = document.createElement("div");
+        outer.className = "msg" + (mine ? " mine" : "");
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        const usernameSpan = document.createElement("span");
+        usernameSpan.className = "username";
+        usernameSpan.textContent = item.username || "Anonymous";
+        usernameSpan.style.setProperty(
+          "--user-gradient",
+          getGradient(item.username || "Anon")
+        );
+        usernameSpan.style.backgroundSize = "300% 300%";
+        meta.appendChild(usernameSpan);
+        meta.appendChild(
+          document.createTextNode(
+            " " + new Date(item.created_at || Date.now()).toLocaleTimeString()
+          )
+        );
+
+        const body = document.createElement("div");
+        body.innerHTML = item.content || "";
+        outer.appendChild(meta);
+        outer.appendChild(body);
+        messagesEl.appendChild(outer);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      async function loadMessages() {
+        const { data } = await supabaseClient
+          .from("messages")
+          .select("*")
+          .order("created_at", { ascending: true })
+          .limit(50);
+        data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
+      }
+
+      async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+        const chaoticText = text.replace(
+          /gif/i,
+          '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
+        );
+
+        await supabaseClient
+          .from("messages")
+          .insert([
+            { user: mySessionId, username: myUsername, content: chaoticText },
+          ]);
+        addMessage(
+          {
+            user: mySessionId,
+            username: myUsername,
+            content: chaoticText,
+            created_at: new Date(),
+          },
+          true
+        );
+        messageInput.value = "";
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      const channel = supabaseClient
+        .channel("chat-room", { config: { presence: { key: mySessionId } } })
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          (payload) => {
+            if (payload.new.user !== mySessionId) addMessage(payload.new);
+          }
+        )
+        .subscribe();
+
+      loadMessages();
+    </script>
+  </body>
+</html>
