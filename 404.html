@@ -201,6 +201,57 @@
         vertical-align: middle;
         max-height: 40px;
       }
+
+      /* Skeleton Loader Styles */
+      .skeleton-msg {
+        padding: 10px 12px;
+        border-radius: 0;
+        max-width: 80%;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+        height: 60px;
+      }
+
+      .skeleton-msg .skeleton-line {
+        height: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        margin-bottom: 8px;
+        border-radius: 2px;
+      }
+
+      .skeleton-msg .skeleton-line.short {
+        width: 40%;
+      }
+
+      .skeleton-msg .skeleton-line.long {
+        width: 90%;
+      }
+
+      .skeleton-msg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 150%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          transparent 0%,
+          rgba(255, 255, 255, 0.1) 50%,
+          transparent 100%
+        );
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          left: -150%;
+        }
+        100% {
+          left: 150%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -425,17 +476,35 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }
 
+      function showSkeletonLoader() {
+        messagesEl.innerHTML = ""; // Clear existing content
+        for (let i = 0; i < 15; i++) {
+          const skeleton = document.createElement("div");
+          skeleton.className = "skeleton-msg";
+          skeleton.innerHTML = `
+            <div class="skeleton-line long"></div>
+          `;
+          if (Math.random() > 0.5) {
+            skeleton.style.maxWidth = "70%";
+          }
+          messagesEl.appendChild(skeleton);
+        }
+      }
+
       // Function to load messages from Supabase
       async function loadMessages() {
+        showSkeletonLoader();
         try {
           const { data, error } = await supabaseClient
             .from("messages")
             .select("*")
             .order("created_at", { ascending: true });
 
+          messagesEl.innerHTML = ""; // Clear skeletons
+
           if (error) {
             console.error("Error loading messages from Supabase:", error);
-            // You might want to display a user-friendly error message here
+            messagesEl.innerHTML = `<div class="msg">Error loading messages.</div>`;
             return;
           }
           data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
@@ -444,6 +513,7 @@
             "Network or unexpected error during message loading:",
             e
           );
+          messagesEl.innerHTML = `<div class="msg">Network error. Could not load chat.</div>`;
         }
       }
 
