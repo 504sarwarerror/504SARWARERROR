@@ -357,6 +357,9 @@
 
       function addMessage(item, mine = false) {
         const outer = document.createElement("div");
+        // Add data attributes to identify user and content for potential removal later
+        outer.dataset.userId = item.user || mySessionId;
+        outer.dataset.content = item.content;
         outer.className = "msg" + (mine ? " mine" : "");
 
         const meta = document.createElement("div");
@@ -425,30 +428,31 @@
         let text = messageInput.value.trim();
         if (!text) return;
 
-        if (text === lastMessageContent) {
-          console.warn("Spam prevention: Duplicate message detected.");
-          return;
-        }
-
-        if (text.length > MAX_MESSAGE_LENGTH) {
-          text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
-        }
-
         const chaoticText = text.replace(
           /gif/i,
           '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
         );
 
+        if (text.length > MAX_MESSAGE_LENGTH) {
+          text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
+        }
+
         const messagePayload = {
           user: mySessionId,
           username: myUsername,
           content: chaoticText,
-          created_at: new Date().toISOString(), // Include created_at
+          created_at: new Date().toISOString(),
         };
+
+        const existingMessages = document.querySelectorAll(
+          `.msg[data-user-id="${mySessionId}"][data-content="${chaoticText}"]`
+        );
+        existingMessages.forEach((msg) => {
+          msg.remove();
+        });
 
         await supabaseClient.from("messages").insert([messagePayload]);
 
-        // Use the same payload for local display
         addMessage(messagePayload, true);
         messageInput.value = "";
         lastMessageTime = now;
