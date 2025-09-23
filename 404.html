@@ -369,7 +369,14 @@
         );
 
         const body = document.createElement("div");
-        body.innerHTML = item.content || "";
+        const sanitizedContent = (item.content || "")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        const finalContent = sanitizedContent.replace(
+          /&lt;img src="https:\/\/media\.giphy\.com\/media\/l0MYt5jPR6QX5pnqM\/giphy\.gif" \/&gt;/g,
+          '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
+        );
+        body.innerHTML = finalContent;
         outer.appendChild(meta);
         outer.appendChild(body);
         messagesEl.appendChild(outer);
