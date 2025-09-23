@@ -248,6 +248,9 @@
       const SPAM_WINDOW = 30000;
       const MAX_MESSAGES_IN_WINDOW = 10;
       let messageTimestamps = [];
+      let userTimeoutUntil = 0;
+      const SPAM_TIMEOUT_DURATION = 30000;
+      const allUserTimestamps = {};
 
       if (!mySessionId) {
         mySessionId = Math.random().toString(36).substring(2, 15);
@@ -357,7 +360,6 @@
 
       function addMessage(item, mine = false) {
         const outer = document.createElement("div");
-        // Add data attributes to identify user and content for potential removal later
         outer.dataset.userId = item.user || mySessionId;
         outer.dataset.content = item.content;
         outer.className = "msg" + (mine ? " mine" : "");
@@ -404,8 +406,17 @@
       }
 
       async function sendMessage() {
+        if (userTimeoutUntil > Date.now()) {
+          const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
+          console.warn(
+            `You are on a timeout for spamming. Please wait ${remaining} seconds.`
+          );
+          messageInput.placeholder = `Timeout for ${remaining}s...`;
+          return;
+        }
+        messageInput.placeholder = "Type a message...";
+
         const now = Date.now();
-        // Basic cooldown to prevent rapid-fire sending
         if (now - lastMessageTime < MESSAGE_COOLDOWN) {
           console.warn(
             "Rate limit exceeded. Please wait before sending another message."
@@ -413,15 +424,16 @@
           return;
         }
 
-        // Advanced rate limiting: filter timestamps to the last 30 seconds
         messageTimestamps = messageTimestamps.filter(
           (timestamp) => now - timestamp < SPAM_WINDOW
         );
 
         if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
           console.warn(
-            "Spam detection: Too many messages sent recently. Please wait."
+            "Spam detection: Too many messages sent. Timed out for 30 seconds."
           );
+          userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
+          messageTimestamps = [];
           return;
         }
 
@@ -471,7 +483,26 @@
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "messages" },
           (payload) => {
-            if (payload.new.user !== mySessionId) addMessage(payload.new);
+            const newUserMessage = payload.new;
+            if (newUserMessage.user === mySessionId) return;
+
+            const now = Date.now();
+            const userId = newUserMessage.user;
+            if (!allUserTimestamps[userId]) {
+              allUserTimestamps[userId] = [];
+            }
+
+            allUserTimestamps[userId] = allUserTimestamps[userId].filter(
+              (timestamp) => now - timestamp < SPAM_WINDOW
+            );
+
+            if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
+              console.warn(`Hiding spam message from user: ${userId}`);
+              return;
+            }
+
+            allUserTimestamps[userId].push(now);
+            addMessage(newUserMessage);
           }
         )
         .subscribe();
