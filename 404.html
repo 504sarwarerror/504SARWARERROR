@@ -509,29 +509,48 @@
           created_at: new Date().toISOString(),
         };
 
-        // Attempt to insert the message into Supabase
+        // Disable the input and button to prevent sending another message
+        sendBtn.disabled = true;
+        messageInput.disabled = true;
+        messageInput.placeholder = "Sending...";
+
         try {
+          // Attempt to insert the message into Supabase
           const { error } = await supabaseClient
             .from("messages")
             .insert([messagePayload]);
+
           if (error) {
             console.error("Error inserting message into Supabase:", error);
+            messageInput.placeholder = "Failed to send. Try again.";
             // You might want to display a user-friendly error message here
             return; // Stop execution if insertion failed
           }
+
+          // On success, add the message locally and clear the input
+          addMessage(messagePayload, true);
+          messageInput.value = "";
+          lastMessageTime = now;
+          lastMessageContent = text;
+          messageTimestamps.push(now);
         } catch (e) {
           console.error(
             "Network or unexpected error during message insertion:",
             e
           );
-          return; // Stop execution if an unexpected error occurred
+          messageInput.placeholder = "Network error. Please check connection.";
+        } finally {
+          // Re-enable the input and button regardless of success or failure
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          if (document.activeElement !== messageInput) {
+            messageInput.focus();
+          }
+          // Restore placeholder only if it wasn't set to an error message
+          if (messageInput.placeholder.includes("...")) {
+            messageInput.placeholder = "Type a message...";
+          }
         }
-
-        addMessage(messagePayload, true);
-        messageInput.value = "";
-        lastMessageTime = now;
-        lastMessageContent = text;
-        messageTimestamps.push(now);
       }
 
       sendBtn.addEventListener("click", sendMessage);
