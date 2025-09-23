@@ -175,6 +175,49 @@
         background: rgba(255, 255, 255, 0.25);
       }
 
+      .settings-dropdown {
+        position: absolute;
+        bottom: 65px; /* Adjust as needed */
+        right: 10px; /* Aligns with the composer padding */
+        background: rgba(0, 0, 0, 0.5); /* More transparent background */
+        backdrop-filter: blur(12px); /* Increased blur for a frostier look */
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 250px;
+      }
+
+      .settings-dropdown label {
+        font-size: 12px;
+        color: #ccc;
+      }
+
+      .settings-dropdown input {
+        padding: 8px;
+        border-radius: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-family: inherit;
+      }
+
+      .settings-dropdown button {
+        padding: 8px;
+        border-radius: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        width: 100%;
+        margin-top: 5px;
+      }
+
       @media (max-width: 600px) {
         .composer input {
           font-size: 12px;
@@ -272,12 +315,39 @@
       </div>
       <div id="messages" class="messages"></div>
       <div class="composer-wrapper">
+        <div
+          id="settingsDropdown"
+          class="settings-dropdown"
+          style="display: none"
+        >
+          <label for="usernameInput">Change Username</label>
+          <input id="usernameInput" type="text" />
+          <button id="saveUsernameBtn" class="composer-button">Save</button>
+        </div>
         <div class="composer">
           <input
             id="messageInput"
             type="text"
             placeholder="Type a message..."
           />
+          <button id="settingsBtn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+              />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
           <button id="sendBtn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -313,6 +383,10 @@
       const messagesEl = document.getElementById("messages");
       const sendBtn = document.getElementById("sendBtn");
       const messageInput = document.getElementById("messageInput");
+      const settingsBtn = document.getElementById("settingsBtn");
+      const settingsDropdown = document.getElementById("settingsDropdown");
+      const usernameInput = document.getElementById("usernameInput");
+      const saveUsernameBtn = document.getElementById("saveUsernameBtn");
 
       let mySessionId = localStorage.getItem("chat_session_id");
       let lastMessageTime = 0;
@@ -628,6 +702,23 @@
         if (e.key === "Enter") sendMessage();
       });
 
+      settingsBtn.addEventListener("click", () => {
+        const isHidden = settingsDropdown.style.display === "none";
+        settingsDropdown.style.display = isHidden ? "flex" : "none";
+        if (isHidden) {
+          usernameInput.value = myUsername;
+          usernameInput.focus();
+        }
+      });
+
+      saveUsernameBtn.addEventListener("click", () => {
+        const newUsername = usernameInput.value.trim();
+        if (newUsername) {
+          myUsername = newUsername;
+          localStorage.setItem("chat_username", myUsername);
+          settingsDropdown.style.display = "none";
+        }
+      });
       const channel = supabaseClient
         .channel("chat-room", { config: { presence: { key: mySessionId } } })
         .on(
