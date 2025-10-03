@@ -1,351 +1,1761 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="icon" href="ASSETS/favicon.jpeg" type="image/jpeg" />
-    <title>SARWAR "BARTMOSS"</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BARTMOSS</title>
+    <link rel="icon" href="ASSETS/favicon.png" type="image/jpeg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-      html,
-      body {
-        height: 100%;
-      }
-      body {
-        background: #ffffff;
-        color: #000000;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 14px;
+      * {
         margin: 0;
-      }
-
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: #ffffff;
-        padding: 5px;
+        padding: 0;
         box-sizing: border-box;
       }
 
-      .top-center {
-        text-align: center;
-      }
-      .top-center img {
-        vertical-align: middle;
+      /* Hide scrollbars for all elements */
+      ::-webkit-scrollbar {
+        display: none;
       }
 
-      .peekin {
-        width: 100%;
-        height: auto;
-        display: block;
-        margin: 0 auto 8px auto;
+      /* Hide scrollbars for Firefox and IE/Edge */
+      * {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
       }
 
-      .small-icons {
-        margin-top: 8px;
-      }
-      .small-icons img {
-        margin: 0 8px;
-        vertical-align: middle;
-        max-height: 48px;
-      }
-
-      .full-table {
-        width: 100%;
-        max-width: 100%;
-        margin-top: 12px;
-        border-collapse: collapse;
-        table-layout: fixed;
-        box-sizing: border-box;
-      }
-      .full-table th,
-      .full-table td {
-        border: 1px solid #000;
-        padding: 8px;
-        vertical-align: middle;
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #e0e0e0;
         overflow: hidden;
-        word-wrap: break-word;
-        white-space: normal;
       }
-      .full-table thead td,
-      .full-table thead th {
+
+      .window {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
         background: #f0f0f0;
+        box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080;
+      }
+
+      .title-bar {
+        background: linear-gradient(to right, #000080, #1084d0);
+        color: white;
+        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .title-bar-controls {
+        display: flex;
+        gap: 4px;
+      }
+
+      .title-bar-btn {
+        width: 20px;
+        height: 20px;
+        background: #c0c0c0;
+        border: 2px solid;
+        border-color: #fff #000 #000 #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        color: #000;
+      }
+
+      .menu-bar {
+        background: #f0f0f0;
+        border-bottom: 2px solid #808080;
+        display: flex;
+        padding: 2px;
+        overflow-x: auto;
+      }
+
+      .menu-item {
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .menu-item:hover {
+        background: #000080;
+        color: white;
+      }
+
+      .toolbar {
+        background: #d7dbe1;
+        border-bottom: 2px solid #808080;
+        padding: 4px;
+        display: flex;
+        gap: 2px;
+        align-items: center;
+      }
+
+      .toolbar-btn {
+        padding: 4px 8px;
+        border: 2px solid;
+        border-color: #fff #000 #000 #fff;
+        background: #c0c0c0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .toolbar-btn:active {
+        border-color: #000 #fff #fff #000;
+      }
+
+      .icon-img {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        background: #f0f0f0;
+      }
+
+      .panel {
+        background: #fff;
+        border: 2px solid;
+        border-color: #808080 #fff #fff #808080;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        background: linear-gradient(to bottom, #dfdfdf, #dfdfdf);
+        padding: 4px 8px;
+        border-bottom: 2px solid #808080;
+        font-weight: bold;
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .tab {
+        padding: 4px 12px;
+        background: #d0d0d0;
+        border: 1px solid #808080;
+        border-bottom: none;
+        cursor: pointer;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tab.active {
+        background: #fff;
+        border-top: 2px solid #000080;
+      }
+
+      .close-btn {
+        cursor: pointer;
+        font-weight: bold;
+        color: #666;
+      }
+
+      .close-btn:hover {
+        color: #000;
+      }
+
+      .tree-item {
+        padding: 2px 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        user-select: none;
+      }
+
+      .tree-item:hover {
+        background: #e0e0ff;
+      }
+
+      .filter-input {
+        width: 100%;
+        padding: 2px 4px;
+        border: 2px solid;
+        border-color: #808080 #fff #fff #808080;
+        font-size: 11px;
+      }
+
+      .code-view {
+        flex: 1;
+        overflow: auto;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        padding: 8px;
+        background: #fff;
+      }
+
+      .code-line {
+        display: flex;
+        gap: 12px;
+        padding: 2px 0;
+        line-height: 1.4;
+      }
+
+      .address {
+        color: #0000ff;
+        font-weight: bold;
+        min-width: 80px;
+      }
+
+      .bytes {
+        color: #666;
+        min-width: 100px;
+      }
+
+      .mnemonic {
+        /* Removed generic color, specific colors defined below */
+        font-weight: bold;
+        min-width: 60px;
+      }
+
+      /* Specific mnemonic colors */
+      .mnemonic.mnemonic-PUSH {
+        color: #00008b;
+      } /* Dark Blue */
+      .mnemonic.mnemonic-MOV {
+        color: #ffa500;
+      } /* Orange */
+      .mnemonic.mnemonic-LEA {
+        color: #800080;
+      } /* Purple */
+      .mnemonic.mnemonic-CALL {
+        color: #008000;
+      } /* Green */
+      .mnemonic.mnemonic-RET {
+        color: #ff0000;
+      } /* Red */
+      .mnemonic.mnemonic-JMP {
+        color: #00ffff;
+      } /* Cyan */
+      .mnemonic.mnemonic-ADD {
+        color: #a52a2a;
+      } /* Brown */
+      .mnemonic.mnemonic-DEC {
+        color: #006400;
+      } /* Dark Green */
+      .mnemonic.mnemonic-JNZ {
+        color: #ff8c00;
+      } /* Dark Orange */
+      .mnemonic.mnemonic-POP {
+        color: #0000ff;
+      } /* Blue */
+
+      .operand {
+        color: #000;
+      }
+
+      .comment {
+        color: #008000;
+        font-style: italic;
+      }
+
+      .line-number {
+        color: #999;
+        min-width: 40px;
+        text-align: right;
+        user-select: none;
+      }
+
+      .keyword {
+        color: #0000ff;
         font-weight: bold;
       }
 
-      .img-cell img {
-        display: block;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
-      .img-cell .gif {
-        max-height: 180px;
-        width: 100%;
+      .function {
+        color: #795e26;
       }
 
-      .about {
-        margin-top: 18px;
-        padding: 12px;
-        border: 1px solid #000;
-        background: #fafafa;
-      }
-      .about h2 {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-      }
-      .about p {
-        margin: 0;
+      .string {
+        color: #a31515;
       }
 
-      a {
+      .number {
+        color: #098658;
+      }
+
+      .splitter-v {
+        width: 4px;
+        background: #c0c0c0;
+        cursor: col-resize;
+        border-left: 1px solid #808080;
+        border-right: 1px solid #fff;
+        position: relative;
+      }
+
+      .splitter-v:hover {
+        background: #a0a0a0;
+      }
+
+      .splitter-h {
+        height: 4px;
+        background: #c0c0c0;
+        cursor: row-resize;
+        border-top: 1px solid #808080;
+        border-bottom: 1px solid #fff;
+      }
+
+      .splitter-h:hover {
+        background: #a0a0a0;
+      }
+
+      /* Added mobile responsive styles */
+      @media (max-width: 768px) {
+        .main-content {
+          flex-direction: column;
+        }
+
+        .splitter-v {
+          display: none;
+        }
+
+        /* On mobile, hide the vertical panels and splitters inside the tabbed view */
+        #leftPanel .panel,
+        #leftPanel .splitter-h {
+          display: none;
+        }
+        /* Show only the active panel */
+        #leftPanel .panel.mobile-active {
+          display: flex;
+          height: 100% !important;
+        }
+
+        .mobile-tab.active {
+          background-color: #000080;
+          color: white;
+        }
+
+        .mobile-row {
+          width: 100% !important;
+          border-bottom: 2px solid #808080;
+        }
+
+        /* Adjusted heights for mobile - assembly smaller, C code larger */
+        .mobile-row-small {
+          height: 30vh;
+          min-height: 200px;
+        }
+
+        .mobile-row-large {
+          height: 70vh;
+          min-height: 400px;
+          flex: 1;
+        }
+
+        /* Make toolbar scrollable on mobile */
+        .toolbar {
+          overflow-x: auto;
+        }
+
+        .icon-img {
+          width: 14px;
+          height: 14px;
+        }
+
+        /* Ensure code views are scrollable */
+        .code-view {
+          overflow-x: auto;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Make code lines wrap better on mobile */
+        .code-line {
+          flex-wrap: wrap;
+          font-size: 10px;
+        }
+
+        .address {
+          min-width: 60px;
+          font-size: 10px;
+        }
+
+        .bytes {
+          min-width: 80px;
+          font-size: 10px;
+        }
+
+        .mnemonic {
+          min-width: 50px;
+          font-size: 10px;
+        }
+      }
+
+      /* Chatroom Styles */
+      .chatroom-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #fff;
         color: #000;
-        text-decoration: underline;
+        overflow: hidden;
+        position: relative;
       }
-
-      .donate-images {
+      .chatroom-container .messages {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+      }
+      .chatroom-container .msg {
+        padding: 6px 10px;
+        border-radius: 3px;
+        max-width: 85%;
+        font-size: 12px;
+        position: relative;
+        overflow-wrap: break-word;
+        background: #f0f0f0;
+        border: 1px solid #d0d0d0;
+      }
+      .chatroom-container .msg.mine {
+        background: #e0e8f0;
+        border-color: #c0d0e0;
+        align-self: flex-end;
+      }
+      .chatroom-container .msg img {
+        max-width: 120px;
+        max-height: 120px;
+        display: block;
+        margin-top: 6px;
+        border: 1px solid #808080;
+      }
+      .chatroom-container .meta {
+        font-size: 10px;
+        margin-bottom: 4px;
+        color: #666;
+      }
+      .chatroom-container .username {
+        font-weight: bold;
+        color: #000080;
+      }
+      .chatroom-container .composer-wrapper {
+        position: relative;
+        z-index: 2;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 4px;
+        padding: 4px;
+        background: #f0f0f0;
+        border-top: 2px solid #808080;
       }
-      .donate-images img {
-        max-width: 100%;
-        height: auto;
-        display: block;
+      .chatroom-container .composer {
+        display: flex;
+        width: 100%;
+        gap: 4px;
+        align-items: center;
       }
-
-      @media (min-width: 800px) {
-        .donate-images {
-          flex-direction: row;
-          justify-content: center;
+      .chatroom-container .composer input {
+        flex: 1;
+        padding: 4px 6px;
+        font-size: 12px;
+        border: 2px solid;
+        border-color: #808080 #fff #fff #808080;
+        font-family: inherit;
+      }
+      .chatroom-container .composer .toolbar-btn {
+        height: 28px;
+        width: 28px;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .chatroom-container .settings-dropdown {
+        position: absolute;
+        bottom: 40px;
+        right: 4px;
+        background: #f0f0f0;
+        border: 2px solid;
+        border-color: #fff #808080 #808080 #fff;
+        padding: 8px;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 220px;
+      }
+      .chatroom-container .settings-dropdown label {
+        font-size: 12px;
+      }
+      .chatroom-container .settings-dropdown input {
+        padding: 4px;
+        border: 2px solid;
+        border-color: #808080 #fff #fff #808080;
+        font-family: inherit;
+        font-size: 12px;
+      }
+      .chatroom-container .settings-dropdown button {
+        padding: 4px 8px;
+        border: 2px solid;
+        border-color: #fff #000 #000 #fff;
+        background: #c0c0c0;
+        cursor: pointer;
+        font-family: inherit;
+        width: 100%;
+        margin-top: 4px;
+      }
+      .chatroom-container .skeleton-msg {
+        padding: 10px 12px;
+        max-width: 80%;
+        background: #f0f0f0;
+        height: 50px;
+        border: 1px solid #e0e0e0;
+      }
+      .chatroom-container .skeleton-msg .skeleton-line {
+        height: 12px;
+        background: #e0e0e0;
+        margin-bottom: 8px;
+      }
+      .chatroom-container .skeleton-msg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 150%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          transparent 0%,
+          rgba(255, 255, 255, 0.5) 50%,
+          transparent 100%
+        );
+        animation: shimmer 1.5s infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          left: -150%;
+        }
+        100% {
+          left: 150%;
         }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="top-center">
-        <img class="peekin" src="ASSETS/PEEKIN.png" alt="PEEKIN" />
-        <div class="small-icons">
-          <img
-            src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/ie_logo.gif"
-            alt="Microsoft Internet Explorer"
-          />
-          <img
-            src="https://raw.githubusercontent.com/fnky/fnky/fnky/img/smile.gif"
-            alt="SMILEY"
-          />
-          <img
-            src="https://raw.githubusercontent.com/BrunnerLivio/brunnerlivio/master/images/noframes.gif"
-            alt="noframes"
-          />
+    <div class="window">
+      <div class="title-bar">
+        <div class="flex items-center gap-2">
+          <img src="ASSETS/ghidra.png" alt="Ghidra Icon" class="icon-img" />
+          <span>BARTMOSS bartmoss50_winx86-64</span>
+        </div>
+        <div class="title-bar-controls">
+          <div class="title-bar-btn">_</div>
+          <div class="title-bar-btn">□</div>
+          <div class="title-bar-btn">X</div>
+        </div>
+      </div>
+
+      <div class="menu-bar">
+        <div class="menu-item" onclick="switchContent('about')">About</div>
+        <div class="menu-item" onclick="switchContent('projects')">
+          Projects
+        </div>
+        <div class="menu-item" onclick="switchContent('writeups')">
+          Writeups
+        </div>
+        <div class="menu-item" onclick="switchContent('contact')">Contact</div>
+        <div class="menu-item" onclick="switchContent('donate')">Donate</div>
+        <div class="menu-item" onclick="switchContent('chatroom')">
+          Chatroom
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <img
+          src="ASSETS/icons/toolbar.png"
+          alt="Toolbar"
+          style="height: 24px; min-width: max-content"
+        />
+      </div>
+
+      <div class="main-content">
+        <div
+          class="flex flex-col mobile-row mobile-row-small"
+          style="width: 280px"
+          id="leftPanel"
+        >
+          <!-- Mobile-only Tab Navigation -->
+          <div class="menu-bar md:hidden" id="mobileNav">
+            <div
+              class="menu-item mobile-tab active"
+              onclick="switchMobileTab('programTreePanel')"
+            >
+              Program Tree
+            </div>
+            <div
+              class="menu-item mobile-tab"
+              onclick="switchMobileTab('symbolTreePanel')"
+            >
+              Symbol Tree
+            </div>
+            <div
+              class="menu-item mobile-tab"
+              onclick="switchMobileTab('dataTypesPanel')"
+            >
+              Data Types
+            </div>
+          </div>
+
+          <div
+            class="panel flex flex-col"
+            style="height: 280px"
+            id="programTreePanel"
+          >
+            <div class="panel-header">
+              <span class="flex items-center gap-2"> Program Tree </span>
+              <span class="cursor-pointer">X</span>
+            </div>
+            <div class="flex border-b border-gray-300">
+              <div class="tab active">
+                <span>bartmoss50_winx86-64</span>
+                <span class="close-btn">X</span>
+              </div>
+            </div>
+            <div class="flex-1 overflow-auto p-2">
+              <div class="tree-item">
+                <span>▼</span>
+                <img
+                  src="ASSETS/icons/ptfl.png"
+                  alt="Folder"
+                  class="icon-img"
+                />
+                <span>bartmoss50_winx86-64</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.bss</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.class</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.data</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.got.plt</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.got</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.dynamic</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.fini_array</span>
+              </div>
+              <div class="tree-item pl-6">
+                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
+                <span>.init_array</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-300 p-1">
+              <div
+                class="tab active"
+                style="display: inline-flex; font-size: 10px"
+              >
+                <span>Program Tree</span>
+                <span class="close-btn ml-2">X</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="splitter-h"></div>
+
+          <div class="panel flex flex-col flex-1" id="symbolTreePanel">
+            <div class="panel-header">
+              <span class="flex items-center gap-2"> Symbol Tree </span>
+              <span class="cursor-pointer">X</span>
+            </div>
+            <div class="p-2 border-b border-gray-300 bg-yellow-100">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold">Filter:</span>
+                <input type="text" class="filter-input flex-1" value="main" />
+                <span class="close-btn text-yellow-600">X</span>
+              </div>
+            </div>
+            <div class="flex-1 overflow-auto p-2">
+              <div class="tree-item">
+                <span>▼</span>
+                <img
+                  src="ASSETS/icons/stfl.png"
+                  alt="Folder"
+                  class="icon-img"
+                />
+                <span>Imports</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>▼</span>
+                <img src="ASSETS/icons/stb.png" alt="Folder" class="icon-img" />
+                <span>&lt;EXTERNAL&gt;</span>
+              </div>
+              <div class="tree-item pl-12">
+                <span>►</span>
+                <img
+                  src="ASSETS/icons/stf.png"
+                  alt="Function"
+                  class="icon-img"
+                />
+                <span style="color: #800080">__libc_start_m</span>
+              </div>
+              <div class="tree-item">
+                <span>▼</span>
+                <img
+                  src="ASSETS/icons/stfl.png"
+                  alt="Folder"
+                  class="icon-img"
+                />
+                <span>Exports</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img
+                  src="ASSETS/icons/stb.png"
+                  alt="Function"
+                  class="icon-img"
+                />
+                <span style="color: #800080">main</span>
+              </div>
+              <div class="tree-item">
+                <span>▼</span>
+                <img
+                  src="ASSETS/icons/stfl.png"
+                  alt="Functions"
+                  class="icon-img"
+                />
+                <span>Functions</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img
+                  src="ASSETS/icons/stb.png"
+                  alt="Function"
+                  class="icon-img"
+                />
+                <span style="color: #800080">__libc_start_mai</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="splitter-h"></div>
+
+          <div
+            class="panel flex flex-col"
+            style="height: 280px"
+            id="dataTypesPanel"
+          >
+            <div class="panel-header">
+              <span class="flex items-center gap-2"> Data Type Manager </span>
+              <div class="flex gap-1">
+                <span class="cursor-pointer">▼</span>
+                <span class="cursor-pointer">X</span>
+              </div>
+            </div>
+            <div class="toolbar border-b border-gray-300">
+              <img
+                src="ASSETS/icons/dtmbar.png"
+                alt="Data Type Manager Toolbar"
+                style="width: 100%; height: auto"
+              />
+            </div>
+            <div class="flex-1 overflow-auto p-2">
+              <div class="tree-item">
+                <span>▼</span>
+                <img
+                  src="ASSETS/icons/dtm.png"
+                  alt="Data Types"
+                  class="icon-img"
+                />
+                <span>Data Types</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img
+                  src="ASSETS/icons/dtmby.png"
+                  alt="Built-in"
+                  class="icon-img"
+                />
+                <span>BuiltInTypes</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img
+                  src="ASSETS/icons/dtmbr.png"
+                  alt="Program"
+                  class="icon-img"
+                />
+                <span>bartmoss50_winx86-64</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-300 p-2 bg-[#D8D7E1]">
+              <div class="text-xs mb-1">Filter:</div>
+              <div class="flex items-center gap-2">
+                <input type="text" class="filter-input flex-1" />
+                <img
+                  src="ASSETS/icons/filter.png"
+                  alt="Search"
+                  class="icon-img"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <table class="full-table">
-          <thead>
-            <tr>
-              <td><b>CODING MALWARE</b></td>
-              <td><b>BREAKING STUFF</b></td>
-            </tr>
-          </thead>
-        </table>
+        <div class="splitter-v" id="splitter1"></div>
 
-        <table class="full-table">
-          <tbody>
-            <tr>
-              <td class="img-cell">
-                <img
-                  class="gif"
-                  src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGpzZ2plZzQzNWtiOGlodnFhcGRiNW5rbXdqY3F5dHhnOGQyY3hiaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5uCNrpW6oqPMuuNhRJ/giphy.gif"
-                  alt="coding malware gif"
-                />
-              </td>
-              <td class="img-cell">
-                <img
-                  class="gif"
-                  src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3NoODViMWwwODJlYWl1cWtqMDE3YXp5a2w5YWhmdWkwcTR1cHR2dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/huSDDCmMrDlEQ6efLN/giphy.gif"
-                  alt="breaking stuff gif"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div
+          class="panel flex flex-col flex-1 mobile-row mobile-row-large"
+          id="centerPanel"
+        >
+          <div class="panel-header">
+            <span>Decompiler: bartmoss50_winx86-64</span>
+            <span class="cursor-pointer">X</span>
+          </div>
+          <div class="code-view" id="listingView"></div>
+        </div>
       </div>
+    </div>
 
-      <div class="about">
-        <h2>About</h2>
-        <p>
-          hey — i’m SARWAR, known in the cramped lights of backroom nets as
-          <b>BARTMOSS</b>. i solder code into the seams of operating systems,
-          whispering low-level tricks where userland never hears. i build slim,
-          nasty little tools that live under the hood: precise, efficient, and
-          bred for silence. i’m not here for glory; i’m here to understand the
-          machine and bend it where it never expected to be bent.
-        </p>
-      </div>
+    <script>
+      // Content data for different sections
+      const contentData = {
+        about: {
+          assembly: `
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Function: main</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Entry point for SARWAR "BARTMOSS" profile</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401000</span><span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span><span class="operand">RBP</span><span class="comment">; Establish stack frame</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401001</span><span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RBP, RSP</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Load and display identity ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_identity_string]</span><span class="comment">; RDI = "hey — i'm SARWAR..."</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040100b</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_text</span><span class="comment">; Print identity to console</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Initialize and display core competencies ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Display philosophy ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401042</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_philosophy_string]</span><span class="comment">; RDI = "i'm not here for glory..."</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401049</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_text</span><span class="comment">; Print philosophy to console</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Clean up and exit ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040104e</span><span class="bytes">b8 00 00 00 00</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">EAX, 0x0</span><span class="comment">; Return 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401053</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401054</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Data Section ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hey — i'm SARWAR, known as BARTMOSS...", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "i'm not here for glory; i'm here to understand the machine...", 0</span>
+            </div>
+           `,
+          decompile: ``,
+        },
+        projects: {
+          assembly: `
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Function: display_projects</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Iterates through project data and displays details.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Click the links below to view the projects.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402000</span><span class="bytes">bf 03 00 00 00</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">EDI, 0x3</span><span class="comment">; EDI = project_count</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402005</span><span class="bytes">48 8d 35 ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RSI, [project_array]</span><span class="comment">; RSI = &project_array</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040200c</span><span class="bytes">eb 1a</span><span class="mnemonic mnemonic-JMP">JMP</span><span class="operand">project_loop_entry</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Project 1: RABIDS ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040200e</span><span class="bytes">48 8b 3e</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RDI, [RSI]</span><span class="comment">; Load project struct pointer</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402011</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display RABIDS details</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Project 2: SAVANT ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402016</span><span class="bytes">48 83 c6 08</span><span class="mnemonic mnemonic-ADD">ADD</span><span class="operand">RSI, 0x8</span><span class="comment">; Move to next project in array</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040201a</span><span class="bytes">48 8b 3e</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RDI, [RSI]</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040201d</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display SAVANT details</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Project 3: BLACKWALL ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402022</span><span class="bytes">48 83 c6 08</span><span class="mnemonic mnemonic-ADD">ADD</span><span class="operand">RSI, 0x8</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402026</span><span class="bytes">48 8b 3e</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RDI, [RSI]</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402029</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display BLACKWALL details</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Loop control ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040202e</span><span class="bytes">ff cf</span><span class="mnemonic mnemonic-DEC">DEC</span><span class="operand">EDI</span><span class="comment">; project_count--</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402030</span><span class="bytes">75 dc</span><span class="mnemonic mnemonic-JNZ">JNZ</span><span class="operand">project_loop_start</span><span class="comment">; Loop if not zero</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402032</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Data definitions for projects ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402100</span><span class="bytes">...</span><span class="mnemonic">s_project_rabids</span><span class="operand">DB "RABIDS - Modular malware framework...", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/sarwaaaar/rabids" target="_blank" class="comment">github.com/sarwaaaar/rabids</a></span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402180</span><span class="bytes">...</span><span class="mnemonic">s_project_savant</span><span class="operand">DB "SAVANT - RAG model trained on malware...", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/sarwaaaar/savant" target="_blank" class="comment">github.com/sarwaaaar/savant</a></span>
+            </div>
+            <div class="code-line">
+              <span class="address">00402200</span><span class="bytes">...</span><span class="mnemonic">s_project_blackwall</span><span class="operand">DB "BLACKWALL - Curated malware sample repository...", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/sarwaaaar/blackwall" target="_blank" class="comment">github.com/sarwaaaar/blackwall</a></span>
+            </div>
+           `,
+          decompile: ``,
+        },
+        writeups: {
+          assembly: `
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Function: open_research_papers</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Loads and presents research documents and writeups.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Click the links below to read the writeups.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403000</span><span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span><span class="operand">RBP</span><span class="comment">; Setup stack for document display routine</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403001</span><span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RBP, RSP</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Load Writeup 1: Malware Guide ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_malware]</span><span class="comment">; RDI = &s_writeup_malware</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040300b</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span><span class="comment">; Open in new tab</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Load Writeup 2: ATM Jackpotting ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403010</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_atm]</span><span class="comment">; RDI = &s_writeup_atm</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403017</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Load Writeup 3: Userland Rootkits ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040301c</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_rootkit]</span><span class="comment">; RDI = &s_writeup_rootkit</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403023</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403028</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403029</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Data Section for Writeups ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403100</span><span class="bytes">...</span><span class="mnemonic">s_writeup_malware</span><span class="operand">DB "Sarwar's Guide to Creating Malware", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki" target="_blank" class="comment">github.com/504sarwarerror/504SARWARERROR/wiki</a></span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403180</span><span class="bytes">...</span><span class="mnemonic">s_writeup_atm</span><span class="operand">DB "ATM Jackpotting Spitting Out Bills", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills" target="_blank" class="comment">github.com/.../ATM-Jackpotting-Spitting-Out-Bills</a></span>
+            </div>
+            <div class="code-line">
+              <span class="address">00403200</span><span class="bytes">...</span><span class="mnemonic">s_writeup_rootkit</span><span class="operand">DB "Userland Rootkit's and the Code Behind it", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it" target="_blank" class="comment">github.com/.../Userland-Rootkit's-and-the-Code-Behind-it</a></span>
+            </div>
+           `,
+          decompile: ``,
+        },
+        contact: {
+          assembly: `
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Function: establish_contact_channels</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Provides links to external communication platforms.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; Click the links below to get in touch.</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; ===================================================================</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405000</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_contact_github]</span><span class="comment">; RDI = &s_contact_github</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405007</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_link</span><span class="comment">; Open GitHub profile</span>
+            </div>
+            <div class="code-line">
+              <span class="address">0040500c</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_contact_discord]</span><span class="comment">; RDI = &s_contact_discord</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405013</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_link</span><span class="comment">; Open Discord invite</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405024</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; --- Data Section for Contact Links ---</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405100</span><span class="bytes">...</span><span class="mnemonic">s_contact_github</span><span class="operand">DB "GitHub Profile", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://github.com/504sarwarerror" target="_blank" class="comment">github.com/504sarwarerror</a></span>
+            </div>
+            <div class="code-line">
+              <span class="address">00405180</span><span class="bytes">...</span><span class="mnemonic">s_contact_discord</span><span class="operand">DB "Discord Server", 0</span>
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+              <span class="comment">; <a href="https://discord.gg/aWeFF8cfAn" target="_blank" class="comment">discord.gg/aWeFF8cfAn</a></span>
+            </div>
+           `,
+          decompile: ``,
+        },
+        donate: {
+          assembly: `
+             <div class="code-line">
+               <span class="address"></span>
+               <span class="bytes"></span>
+               <span class="mnemonic"></span>
+               <span class="operand"></span>
+               <span class="comment">; ===================================================================</span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span>
+               <span class="bytes"></span>
+               <span class="mnemonic"></span>
+               <span class="operand"></span>
+               <span class="comment">; Support / Donate</span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+               <span class="comment">; Click the links below to open the QR codes.</span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span>
+               <span class="bytes"></span>
+               <span class="mnemonic"></span>
+               <span class="operand"></span>
+               <span class="comment">; ===================================================================</span>
+             </div>
+             <div class="code-line">
+               <span class="address">00406000</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_support_message]</span><span class="comment">; Load support message</span>
+             </div>
+             <div class="code-line">
+               <span class="address">00406007</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">printf</span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+               <span class="comment">; --- Display QR Codes ---</span>
+             </div>
+             <div class="code-line">
+               <span class="address">0040600c</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_qr_codes</span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+               <span class="comment">
+                 ; <a href="../504SARWARERROR/ASSETS/QRC.jpg" target="_blank" class="comment">BTC Donation (QR)</a>
+               </span>
+             </div>
+             <div class="code-line">
+               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
+               <span class="comment">
+                 ; <a href="../504SARWARERROR/ASSETS/QRCETH.jpg" target="_blank" class="comment">ETH Donation (QR)</a>
+               </span>
+             </div>
+             <div class="code-line" style="margin-top: 10px;">
+               <span class="address">00406011</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
+             </div>
+           `,
+          decompile: ``,
+        },
+        chatroom: {
+          assembly: `
+            <div class="code-line">
+              <span class="address">00407000</span>
+              <span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span>
+              <span class="operand">RBP</span>
+              <span class="comment">; Establishing connection to chat server...</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00407001</span>
+              <span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span>
+              <span class="operand">RBP,RSP</span>
+            </div>
+             <div class="code-line">
+              <span class="address">00407004</span>
+              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
+              <span class="operand">init_supabase_channel</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00407009</span>
+              <span class="bytes">48 8d 3d</span><span class="mnemonic mnemonic-LEA">LEA</span>
+              <span class="operand">RDI,[s_realtime_channel]</span>
+            </div>
+            <div class="code-line">
+              <span class="address">00407010</span>
+              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
+              <span class="operand">subscribe_to_messages</span>
+               <span class="comment">; Listening for incoming messages</span>
+            </div>
+             <div class="code-line">
+              <span class="address">00407015</span>
+              <span class="bytes">eb fe</span><span class="mnemonic mnemonic-JMP">JMP</span>
+              <span class="operand">00407015</span>
+               <span class="comment">; Infinite loop to keep connection alive</span>
+            </div>
+          `,
+          decompile: ``,
+        },
+      };
 
-      <table class="full-table">
-        <tbody>
-          <tr>
-            <td style="text-align: center">
-              <a href="https://github.com/504sarwarerror"><b>GitHub</b></a>
-            </td>
-            <td style="text-align: center">
-              <a href="https://discord.gg/aWeFF8cfAn"><b>Discord</b></a>
-            </td>
-            <td style="text-align: center">
-              <a href="404.html"><b>404 Chat Room</b></a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table class="full-table">
-        <thead>
-          <tr>
-            <td><b>Projects</b></td>
-            <td style="width: 80px"><b>Stars</b></td>
-            <td style="width: 80px"><b>Forks</b></td>
-            <td><b>Description</b></td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <a href="https://github.com/sarwaaaar/rabids"><b>RABIDS</b></a>
-            </td>
-            <td>
-              <img
-                alt="Stars"
-                src="https://img.shields.io/github/stars/sarwaaaar/rabids?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              <img
-                alt="Forks"
-                src="https://img.shields.io/github/forks/sarwaaaar/rabids?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              modular malware framework to build custom payloads, designed for
-              advanced adversary simulation and malware research
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="https://github.com/sarwaaaar/savant"><b>SAVANT</b></a>
-            </td>
-            <td>
-              <img
-                alt="Stars"
-                src="https://img.shields.io/github/stars/sarwaaaar/savant?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              <img
-                alt="Forks"
-                src="https://img.shields.io/github/forks/sarwaaaar/savant?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              a rag model trained on malware sample, it is designed to generate
-              new malware
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <a href="https://github.com/sarwaaaar/blackwall"
-                ><b>BLACKWALL</b></a
-              >
-            </td>
-            <td>
-              <img
-                alt="Stars"
-                src="https://img.shields.io/github/stars/sarwaaaar/blackwall?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              <img
-                alt="Forks"
-                src="https://img.shields.io/github/forks/sarwaaaar/blackwall?style=flat-square&labelColor=343b41"
-              />
-            </td>
-            <td>
-              curated repository of malware samples preserved for research and
-              analysis
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table class="full-table" style="margin-top: 14px">
-        <thead>
-          <tr>
-            <th colspan="2" style="text-align: center">
-              <img
-                src="ASSETS/WRITEUPS.png"
-                style="width: 100%; max-width: 350px; object-fit: cover"
-              />
-            </th>
-            <th colspan="2" style="text-align: center">
-              <img
-                src="ASSETS/DONATE.png"
-                style="width: 100%; max-width: 150px; object-fit: cover"
-              />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="vertical-align: top; padding: 10px">
-              <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki"
-                >Sarwar's Guide to Creating Malware</a
-              >
-            </td>
-            <td style="vertical-align: top; padding: 10px">
-              compilation of write-ups about malware development
-            </td>
-            <td style="vertical-align: top" colspan="2" rowspan="3">
-              <div style="text-align: center">
-                <div class="donate-images">
-                  <img
-                    src="ASSETS/QRC.jpg"
-                    style="width: 160px; height: auto"
-                    alt="Donate QR Code"
-                  />
-                  <img
-                    src="ASSETS/QRCETH.jpg"
-                    style="width: 160px; height: auto"
-                    alt="Donate QR Code"
-                  />
+      // Function to switch content
+      function switchContent(section) {
+        const data = contentData[section];
+        if (data) {
+          const listingView = document.getElementById("listingView");
+          if (section === "chatroom") {
+            // For the chatroom, we inject the full HTML UI.
+            listingView.innerHTML = `
+              <div class="chatroom-container">
+                <div id="messages" class="messages"></div>
+                <div id="settingsDropdown" class="settings-dropdown" style="display: none">
+                  <label for="usernameInput">Change Username:</label>
+                  <input id="usernameInput" type="text" />
+                  <button id="saveUsernameBtn">Save</button>
+                </div>
+                <div class="composer-wrapper">
+                  <div class="composer">
+                    <input id="messageInput" type="text" placeholder="Type a message..." />
+                    <button id="settingsBtn" class="toolbar-btn" title="Settings">⚙️</button>
+                    <button id="sendBtn" class="toolbar-btn" title="Send">▶</button>
+                  </div>
                 </div>
               </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="vertical-align: top; padding: 10px">
-              <a
-                href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills"
-                >ATM Jackpotting Spitting Out Bills</a
-              >
-            </td>
-            <td style="vertical-align: top; padding: 10px">
-              when an atm spits out all its money to you
-            </td>
-          </tr>
-          <tr>
-            <td style="vertical-align: top; padding: 10px">
-              <a
-                href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it"
-                >Userland Rootkit's and the Code Behind it</a
-              >
-            </td>
-            <td style="vertical-align: top; padding: 10px">
-              how a rootkit works and the code behind it
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            `;
+          } else {
+            listingView.innerHTML = data.assembly;
+          }
+
+          if (section === "chatroom") {
+            initChatroom();
+          }
+        }
+      }
+
+      // Function to switch mobile tabs
+      function switchMobileTab(tabId) {
+        // Don't run on desktop
+        if (window.innerWidth > 768) return;
+
+        // Update active tab button
+        const tabs = document.querySelectorAll("#mobileNav .mobile-tab");
+        tabs.forEach((tab) => {
+          tab.classList.remove("active");
+          if (tab.getAttribute("onclick").includes(tabId)) {
+            tab.classList.add("active");
+          }
+        });
+
+        // Update active panel content
+        const panels = document.querySelectorAll("#leftPanel .panel");
+        panels.forEach((panel) => {
+          panel.classList.remove("mobile-active");
+        });
+        document.getElementById(tabId).classList.add("mobile-active");
+      }
+
+      // Set initial mobile tab
+      switchMobileTab("programTreePanel");
+
+      // Chatroom Logic
+      function initChatroom() {
+        const SUPABASE_URL = "https://jfjozylvsbhsyiyfpacp.supabase.co";
+        const SUPABASE_ANON_KEY =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmam96eWx2c2Joc3lpeWZwYWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MzczMTAsImV4cCI6MjA3NDIxMzMxMH0.M9kZUvXvJbY4H1rNp9qK-avTrKBOLifRFmYQByzD0KI";
+        const supabaseClient = supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY
+        );
+
+        const messagesEl = document.getElementById("messages");
+        const sendBtn = document.getElementById("sendBtn");
+        const messageInput = document.getElementById("messageInput");
+        const settingsBtn = document.getElementById("settingsBtn");
+        const settingsDropdown = document.getElementById("settingsDropdown");
+        const usernameInput = document.getElementById("usernameInput");
+        const saveUsernameBtn = document.getElementById("saveUsernameBtn");
+
+        // Ensure elements exist before proceeding
+        if (!messagesEl || !sendBtn || !messageInput) {
+          console.error("Chatroom elements not found. Aborting init.");
+          return;
+        }
+
+        let mySessionId = localStorage.getItem("chat_session_id");
+        let lastMessageTime = 0;
+        let lastMessageContent = "";
+        const MESSAGE_COOLDOWN = 2000;
+        const MAX_MESSAGE_LENGTH = 500;
+        const MAX_USERNAME_LENGTH = 25;
+        const SPAM_WINDOW = 30000;
+        const MAX_MESSAGES_IN_WINDOW = 10;
+        let messageTimestamps = [];
+        let userTimeoutUntil = 0;
+        const SPAM_TIMEOUT_DURATION = 30000;
+        const allUserTimestamps = {};
+
+        if (!mySessionId) {
+          mySessionId = Math.random().toString(36).substring(2, 15);
+          localStorage.setItem("chat_session_id", mySessionId);
+        }
+
+        function randomUsername() {
+          const adjectives = [
+            "Retro",
+            "Ghost",
+            "Cyber",
+            "Pixel",
+            "Neon",
+            "Shadow",
+            "Glitch",
+            "Toxic",
+            "Quantum",
+            "Mad",
+            "Broken",
+            "Void",
+            "Viral",
+            "Feral",
+            "Cha0s",
+            "Null",
+            "Error",
+            "Fractured",
+          ];
+          const nouns = [
+            "Tiger",
+            "Falcon",
+            "Ninja",
+            "Dragon",
+            "Panda",
+            "Freak",
+            "Virus",
+            "Anon",
+            "Corpse",
+            "Reaper",
+            "Dumpster",
+            "Ghoul",
+            "Hack",
+            "Phantom",
+            "Wraith",
+            "Blob",
+            "Overload",
+          ];
+          const symbols = [
+            "_",
+            "-",
+            "~",
+            "!",
+            "@",
+            "#",
+            "$",
+            "%",
+            "^",
+            "∆",
+            "?",
+          ];
+          const endings = ["404", "666", "XxX", "Ω", ".exe", "!!", "∞", "?!"];
+          const leetify = (word) =>
+            word.replace(
+              /[aAeEiIoOsStT]/g,
+              (c) =>
+                ({ a: "4", e: "3", i: "1", o: "0", s: "5", t: "7" }[
+                  c.toLowerCase()
+                ] || c)
+            );
+          const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+          const noun = nouns[Math.floor(Math.random() * nouns.length)];
+          const sym = symbols[Math.floor(Math.random() * symbols.length)];
+          const end = endings[Math.floor(Math.random() * endings.length)];
+          const number = Math.floor(Math.random() * 999);
+          const style = Math.random();
+          let name;
+          if (style < 0.25) name = leetify(adj) + sym + leetify(noun) + end;
+          else if (style < 0.5)
+            name = adj.toUpperCase() + sym + noun.toLowerCase() + number;
+          else if (style < 0.75)
+            name = adj.toLowerCase() + noun.toUpperCase() + sym + end;
+          else
+            name =
+              leetify(adj) +
+              leetify(noun) +
+              symbols[Math.floor(Math.random() * symbols.length)] +
+              number;
+          return name;
+        }
+
+        function generateGradientForUsername(username) {
+          let hash = 0;
+          for (let i = 0; i < username.length; i++)
+            hash = username.charCodeAt(i) + ((hash << 5) - hash);
+          const hue1 = Math.abs(hash % 360);
+          const hue2 = (hue1 + 72) % 360;
+          return `linear-gradient(90deg, hsl(${hue1}, 80%, 60%), hsl(${hue2}, 80%, 60%), hsl(${hue1}, 80%, 60%))`;
+        }
+
+        let myUsername =
+          localStorage.getItem("chat_username") || randomUsername();
+        localStorage.setItem("chat_username", myUsername);
+
+        const usernameGradients = {};
+        function getGradient(username) {
+          if (!usernameGradients[username])
+            usernameGradients[username] = generateGradientForUsername(username);
+          return usernameGradients[username];
+        }
+
+        function addMessage(item, mine = false) {
+          const outer = document.createElement("div");
+          outer.dataset.userId = item.user || mySessionId;
+          outer.dataset.content = item.content;
+          outer.className = "msg" + (mine ? " mine" : "");
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          const usernameSpan = document.createElement("span");
+          usernameSpan.className = "username";
+          let username = item.username || "Anonymous";
+          if (username.length > MAX_USERNAME_LENGTH) {
+            username = username.substring(0, MAX_USERNAME_LENGTH) + "...";
+          }
+          usernameSpan.textContent = username;
+
+          meta.appendChild(
+            document.createTextNode(
+              " " + new Date(item.created_at || Date.now()).toLocaleTimeString()
+            )
+          );
+
+          const body = document.createElement("div");
+          const sanitizedContent = (item.content || "")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+          const finalContent = sanitizedContent.replace(
+            /&lt;img src="https:\/\/media\.giphy\.com\/media\/l0MYt5jPR6QX5pnqM\/giphy\.gif" \/&gt;/g,
+            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
+          );
+          body.innerHTML = finalContent;
+          outer.appendChild(meta);
+          outer.appendChild(body);
+          messagesEl.appendChild(outer);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function showSkeletonLoader() {
+          messagesEl.innerHTML = "";
+          for (let i = 0; i < 15; i++) {
+            const skeleton = document.createElement("div");
+            skeleton.className = "skeleton-msg";
+            skeleton.innerHTML = `<div class="skeleton-line long"></div>`;
+            if (Math.random() > 0.5) {
+              skeleton.style.maxWidth = "70%";
+            }
+            messagesEl.appendChild(skeleton);
+          }
+        }
+
+        async function loadMessages() {
+          showSkeletonLoader();
+          try {
+            const { data, error } = await supabaseClient
+              .from("messages")
+              .select("*")
+              .order("created_at", { ascending: true });
+            messagesEl.innerHTML = "";
+            if (error) {
+              console.error("Error loading messages:", error);
+              messagesEl.innerHTML = `<div class="msg">Error loading messages.</div>`;
+              return;
+            }
+            data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
+          } catch (e) {
+            console.error("Network error during message loading:", e);
+            messagesEl.innerHTML = `<div class="msg">Network error. Could not load chat.</div>`;
+          }
+        }
+
+        async function sendMessage() {
+          if (userTimeoutUntil > Date.now()) {
+            const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
+            messageInput.placeholder = `Timeout for ${remaining}s...`;
+            return;
+          }
+          messageInput.placeholder = "Type a message...";
+
+          const now = Date.now();
+          if (now - lastMessageTime < MESSAGE_COOLDOWN) return;
+
+          messageTimestamps = messageTimestamps.filter(
+            (timestamp) => now - timestamp < SPAM_WINDOW
+          );
+
+          if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
+            userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
+            messageTimestamps = [];
+            return;
+          }
+
+          let text = messageInput.value.trim();
+          if (text && text === lastMessageContent) {
+            messageInput.placeholder = "Please don't send duplicate messages.";
+            return;
+          }
+
+          const chaoticText = text.replace(
+            /gif/i,
+            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
+          );
+          if (text.length > MAX_MESSAGE_LENGTH) {
+            text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
+          }
+
+          const messagePayload = {
+            user: mySessionId,
+            username: myUsername,
+            content: chaoticText,
+            created_at: new Date().toISOString(),
+          };
+
+          sendBtn.disabled = true;
+          messageInput.disabled = true;
+          messageInput.placeholder = "Sending...";
+
+          try {
+            const { error } = await supabaseClient
+              .from("messages")
+              .insert([messagePayload]);
+            if (error) {
+              console.error("Error sending message:", error);
+              messageInput.placeholder = "Failed to send. Try again.";
+              return;
+            }
+            // Don't call addMessage here, let the subscription handle it to avoid duplicates
+            messageInput.value = "";
+            lastMessageTime = now;
+            lastMessageContent = text;
+            messageTimestamps.push(now);
+          } catch (e) {
+            console.error("Network error during message insertion:", e);
+            messageInput.placeholder =
+              "Network error. Please check connection.";
+          } finally {
+            sendBtn.disabled = false;
+            messageInput.disabled = false;
+            if (document.activeElement !== messageInput) {
+              messageInput.focus();
+            }
+            if (messageInput.placeholder.includes("...")) {
+              messageInput.placeholder = "Type a message...";
+            }
+          }
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") sendMessage();
+        });
+
+        settingsBtn.addEventListener("click", () => {
+          const isHidden = settingsDropdown.style.display === "none";
+          settingsDropdown.style.display = isHidden ? "flex" : "none";
+          if (isHidden) {
+            usernameInput.value = myUsername;
+            usernameInput.focus();
+          }
+        });
+
+        saveUsernameBtn.addEventListener("click", () => {
+          const newUsername = usernameInput.value.trim();
+          if (newUsername) {
+            myUsername = newUsername;
+            localStorage.setItem("chat_username", myUsername);
+            settingsDropdown.style.display = "none";
+          }
+        });
+
+        const channel = supabaseClient
+          .channel("chat-room", { config: { presence: { key: mySessionId } } })
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "messages" },
+            (payload) => {
+              const newUserMessage = payload.new;
+              const now = Date.now();
+              const userId = newUserMessage.user;
+
+              // This prevents your own successfully sent messages from appearing a second time.
+              if (
+                newUserMessage.user === mySessionId &&
+                newUserMessage.content.includes(lastMessageContent)
+              ) {
+                // Find the local message and remove it, as we'll add the one from DB
+                const localMsg = document.querySelector(
+                  `.msg[data-user="${mySessionId}"][data-content="${newUserMessage.content}"]`
+                );
+                if (localMsg) localMsg.remove();
+              }
+
+              if (!allUserTimestamps[userId]) {
+                allUserTimestamps[userId] = [];
+              }
+
+              allUserTimestamps[userId] = allUserTimestamps[userId].filter(
+                (timestamp) => now - timestamp < SPAM_WINDOW
+              );
+
+              if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
+                console.warn(`Hiding spam message from user: ${userId}`);
+                return;
+              }
+
+              allUserTimestamps[userId].push(now);
+              addMessage(newUserMessage, newUserMessage.user === mySessionId);
+            }
+          )
+          .subscribe((status) => {
+            if (status === "SUBSCRIBED") {
+              console.log("Connected to chat channel!");
+              loadMessages();
+            }
+          });
+
+        // Return a cleanup function to unsubscribe when the tab is changed
+        return () => {
+          console.log("Unsubscribing from chat channel.");
+          supabaseClient.removeChannel(channel);
+        };
+      }
+
+      // Initialize with about content
+      switchContent("about");
+
+      let isResizing = false;
+      let currentSplitter = null;
+
+      function initResizable() {
+        const splitter1 = document.getElementById("splitter1");
+        const splitter2 = document.getElementById("splitter2");
+        const leftPanel = document.getElementById("leftPanel");
+        const centerPanel = document.getElementById("centerPanel");
+        const rightPanel = document.getElementById("rightPanel");
+
+        if (window.innerWidth <= 768) {
+          // Disable resizing on mobile
+          return;
+        }
+
+        splitter1.addEventListener("mousedown", (e) => {
+          isResizing = true;
+          currentSplitter = "splitter1";
+          document.body.style.cursor = "col-resize";
+        });
+
+        splitter2.addEventListener("mousedown", (e) => {
+          isResizing = true;
+          currentSplitter = "right";
+          document.body.style.cursor = "col-resize";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (!isResizing) return;
+
+          if (currentSplitter === "splitter1") {
+            const newWidth = e.clientX;
+            if (newWidth > 200 && newWidth < 500) {
+              leftPanel.style.width = newWidth + "px";
+            }
+          }
+        });
+
+        document.addEventListener("mouseup", () => {
+          isResizing = false;
+          currentSplitter = null;
+          document.body.style.cursor = "default";
+        });
+      }
+
+      // Initialize resizable panels
+      initResizable();
+
+      // Reinitialize on window resize
+      window.addEventListener("resize", () => {
+        location.reload(); // Simple way to handle layout change, can be improved
+      });
+    </script>
   </body>
 </html>
