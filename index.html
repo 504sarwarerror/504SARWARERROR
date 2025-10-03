@@ -1028,6 +1028,29 @@
           decompile: ``,
         },
         writeups: {
+          data: [
+            {
+              title: "Sarwar's Guide to Creating Malware",
+              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki",
+              shortUrl: "github.com/504sarwarerror/504SARWARERROR/wiki",
+            },
+            {
+              title: "ATM Jackpotting Spitting Out Bills",
+              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills",
+              shortUrl: "github.com/.../ATM-Jackpotting-Spitting-Out-Bills",
+            },
+            {
+              title: "Userland Rootkit's and the Code Behind it",
+              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it",
+              shortUrl:
+                "github.com/.../Userland-Rootkit's-and-the-Code-Behind-it",
+            },
+            {
+              title: "Discord C2 Server and a Rat",
+              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat",
+              shortUrl: "github.com/.../Discord-C2-Server-and-a-Rat",
+            },
+          ],
           assembly: `
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
@@ -1054,67 +1077,6 @@
             </div>
             <div class="code-line">
               <span class="address">00403001</span><span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RBP, RSP</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Load Writeup 1: Malware Guide ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_malware]</span><span class="comment">; RDI = &s_writeup_malware</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040300b</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span><span class="comment">; Open in new tab</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Load Writeup 2: ATM Jackpotting ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403010</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_atm]</span><span class="comment">; RDI = &s_writeup_atm</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403017</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Load Writeup 3: Userland Rootkits ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040301c</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_writeup_rootkit]</span><span class="comment">; RDI = &s_writeup_rootkit</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403023</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403028</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403029</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Data Section for Writeups ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403100</span><span class="bytes">...</span><span class="mnemonic">s_writeup_malware</span><span class="operand">DB "Sarwar's Guide to Creating Malware", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki" target="_blank" class="comment">github.com/504sarwarerror/504SARWARERROR/wiki</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403180</span><span class="bytes">...</span><span class="mnemonic">s_writeup_atm</span><span class="operand">DB "ATM Jackpotting Spitting Out Bills", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills" target="_blank" class="comment">github.com/.../ATM-Jackpotting-Spitting-Out-Bills</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403200</span><span class="bytes">...</span><span class="mnemonic">s_writeup_rootkit</span><span class="operand">DB "Userland Rootkit's and the Code Behind it", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it" target="_blank" class="comment">github.com/.../Userland-Rootkit's-and-the-Code-Behind-it</a></span>
             </div>
            `,
           decompile: ``,
@@ -1293,6 +1255,8 @@
                 <div class="composer-wrapper">
                   <div class="composer">
                     <input id="messageInput" type="text" placeholder="Type a message..." />
+                    <button id="settingsBtn" class="toolbar-btn" title="Settings">
+                    </button>
                     <button id="sendBtn" class="toolbar-btn" title="Send">
                       ➤
                     </button>
@@ -1302,6 +1266,81 @@
             `;
           } else {
             listingView.innerHTML = data.assembly;
+          }
+
+          if (section === "writeups" && data.data) {
+            let assemblyContent = data.assembly;
+            let dataSectionContent = `
+              <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Data Section for Writeups ---</span></div>
+            `;
+            let callInstructions = "";
+            let currentAddress = 0x00403004;
+
+            data.data.forEach((writeup, index) => {
+              const varName = `s_writeup_${index}`;
+              callInstructions += `
+                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Load Writeup ${
+                  index + 1
+                }: ${writeup.title.substring(0, 20)}... ---</span></div>
+                <div class="code-line"><span class="address">${currentAddress
+                  .toString(16)
+                  .toUpperCase()
+                  .padStart(
+                    8,
+                    "0"
+                  )}</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [${varName}]</span><span class="comment">; RDI = &${varName}</span></div>
+              `;
+              currentAddress += 7;
+              callInstructions += `
+                <div class="code-line"><span class="address">${currentAddress
+                  .toString(16)
+                  .toUpperCase()
+                  .padStart(
+                    8,
+                    "0"
+                  )}</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span></div>
+              `;
+              currentAddress += 5;
+
+              dataSectionContent += `
+                <div class="code-line"><span class="address">${(
+                  0x00403100 +
+                  index * 0x80
+                )
+                  .toString(16)
+                  .toUpperCase()}</span><span class="bytes">...</span><span class="mnemonic">${varName}</span><span class="operand">DB "${
+                writeup.title
+              }", 0</span></div>
+                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; <a href="${
+                  writeup.url
+                }" target="_blank" class="comment">${
+                writeup.shortUrl
+              }</a></span></div>
+              `;
+            });
+
+            const exitInstructions = `
+              <div class="code-line"><span class="address">${currentAddress
+                .toString(16)
+                .toUpperCase()
+                .padStart(
+                  8,
+                  "0"
+                )}</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span></div>
+              <div class="code-line"><span class="address">${(
+                currentAddress + 1
+              )
+                .toString(16)
+                .toUpperCase()
+                .padStart(
+                  8,
+                  "0"
+                )}</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span></div>
+            `;
+            listingView.innerHTML = assemblyContent.replace(
+              "</div>", // This targets the closing div of the initial assembly prologue
+              `</div>${dataSectionContent}${callInstructions}${exitInstructions}` // Inserts data, then calls, then exit instructions
+            );
           }
 
           if (section === "chatroom") {
@@ -1354,7 +1393,7 @@
         const saveUsernameBtn = document.getElementById("saveUsernameBtn");
 
         // Ensure elements exist before proceeding
-        if (!messagesEl || !sendBtn || !messageInput) {
+        if (!messagesEl || !sendBtn || !messageInput || !settingsBtn) {
           console.error("Chatroom elements not found. Aborting init.");
           return;
         }
@@ -1496,6 +1535,7 @@
           }
           usernameSpan.textContent = username;
 
+          meta.appendChild(usernameSpan);
           meta.appendChild(
             document.createTextNode(
               " " + new Date(item.created_at || Date.now()).toLocaleTimeString()
