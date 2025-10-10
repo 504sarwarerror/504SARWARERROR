@@ -36,6 +36,18 @@
       </tr>
     </thead>
     <tbody>
+        <tr>
+        <td> 
+          <a href="https://github.com/504sarwarerror/CASM"><b>CASM</b></a>
+        </td>
+        <td>
+          <img alt="Stars" src="https://img.shields.io/github/stars/504sarwarerror/CASM?style=flat-square&labelColor=343b41"/>
+        </td>
+        <td>
+          <img alt="Forks" src="https://img.shields.io/github/forks/504sarwarerror/CASM?style=flat-square&labelColor=343b41"/>
+        </td>
+        <td>compiler designed to seamlessly blend assembly and c, yes i write my malware in assembly</td>
+      </tr>
       <tr>
         <td> 
           <a href="https://github.com/sarwaaaar/rabids"><b>RABIDS</b></a>
