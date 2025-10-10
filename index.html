@@ -209,6 +209,7 @@
         gap: 12px;
         padding: 2px 0;
         line-height: 1.4;
+        align-items: flex-start; /* allow multi-line children to wrap */
       }
 
       .address {
@@ -262,11 +263,19 @@
 
       .operand {
         color: #000;
+        min-width: 0; /* allow flex children to shrink */
+        flex: 1 1 auto; /* allow operands to grow and wrap */
+        white-space: pre-wrap; /* preserve spacing and wrap long text */
+        word-break: break-word;
       }
 
       .comment {
         color: #008000;
         font-style: italic;
+        min-width: 0;
+        flex: 1 1 auto;
+        white-space: pre-wrap;
+        word-break: break-word;
       }
 
       .comment a,
@@ -339,71 +348,6 @@
         #leftPanel .panel,
         #leftPanel .splitter-h {
           display: none;
-        }
-        /* Show only the active panel */
-        #leftPanel .panel.mobile-active {
-          display: flex;
-          height: 100% !important;
-        }
-
-        .mobile-tab.active {
-          background-color: #000080;
-          color: white;
-        }
-
-        .mobile-row {
-          width: 100% !important;
-          border-bottom: 2px solid #808080;
-        }
-
-        /* Adjusted heights for mobile - assembly smaller, C code larger */
-        .mobile-row-small {
-          height: 30vh;
-          min-height: 200px;
-        }
-
-        .mobile-row-large {
-          height: 70vh;
-          min-height: 400px;
-          flex: 1;
-        }
-
-        /* Make toolbar scrollable on mobile */
-        .toolbar {
-          overflow-x: auto;
-        }
-
-        .icon-img {
-          width: 14px;
-          height: 14px;
-        }
-
-        /* Ensure code views are scrollable */
-        .code-view {
-          overflow-x: auto;
-          overflow-y: auto;
-          -webkit-overflow-scrolling: touch;
-        }
-
-        /* Make code lines wrap better on mobile */
-        .code-line {
-          flex-wrap: wrap;
-          font-size: 10px;
-        }
-
-        .address {
-          min-width: 60px;
-          font-size: 10px;
-        }
-
-        .bytes {
-          min-width: 80px;
-          font-size: 10px;
-        }
-
-        .mnemonic {
-          min-width: 50px;
-          font-size: 10px;
         }
       }
 
@@ -528,6 +472,8 @@
         background: #f0f0f0;
         height: 50px;
         border: 1px solid #e0e0e0;
+        position: relative;
+        overflow: hidden;
       }
       .chatroom-container .skeleton-msg .skeleton-line {
         height: 12px;
@@ -550,12 +496,8 @@
         animation: shimmer 1.5s infinite;
       }
       @keyframes shimmer {
-        0% {
-          left: -150%;
-        }
-        100% {
-          left: 150%;
-        }
+        0% { left: -150%; }
+        100% { left: 150%; }
       }
     </style>
   </head>
@@ -575,17 +517,7 @@
 
       <div class="menu-bar">
         <div class="menu-item" onclick="switchContent('about')">About</div>
-        <div class="menu-item" onclick="switchContent('projects')">
-          Projects
-        </div>
-        <div class="menu-item" onclick="switchContent('writeups')">
-          Writeups
-        </div>
-        <div class="menu-item" onclick="switchContent('contact')">Contact</div>
-        <div class="menu-item" onclick="switchContent('donate')">Donate</div>
-        <div class="menu-item" onclick="switchContent('chatroom')">
-          Chatroom
-        </div>
+        <div class="menu-item" onclick="switchContent('chatroom')">Chatroom</div>
       </div>
 
       <div class="toolbar">
@@ -606,36 +538,82 @@
           <div class="menu-bar md:hidden" id="mobileNav">
             <div
               class="menu-item mobile-tab active"
-              onclick="switchMobileTab('programTreePanel')"
+              onclick="switchMobileTab('symbolTreePanel')"
             >
-              Program Tree
+              Projects Tree
             </div>
             <div
               class="menu-item mobile-tab"
-              onclick="switchMobileTab('symbolTreePanel')"
+              onclick="switchMobileTab('writeupTreePanel')"
             >
-              Symbol Tree
+              Writeup Tree
             </div>
             <div
               class="menu-item mobile-tab"
               onclick="switchMobileTab('dataTypesPanel')"
             >
-              Data Types
+              Link Type Manager
             </div>
           </div>
+
+          <div class="panel flex flex-col flex-1" id="symbolTreePanel">
+            <div class="panel-header">
+              <span class="flex items-center gap-2"> Projects Tree </span>
+              <span class="cursor-pointer">X</span>
+            </div>
+            <div class="p-2 border-b border-gray-300 bg-yellow-100">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold">Filter:</span>
+                <input type="text" class="filter-input flex-1" value="main" />
+                <span class="close-btn text-yellow-600">X</span>
+              </div>
+            </div>
+            <div class="flex-1 overflow-auto p-2">
+              <!-- Projects Folder -->
+              <div class="tree-item">
+                <span>▼</span>
+                <img src="ASSETS/icons/stfl.png" alt="Folder" class="icon-img" />
+                <span>Projects</span>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
+                <a href="https://github.com/sarwaaaar/rabids" target="_blank" style="color:inherit; text-decoration:none;">RABIDS</a>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
+                <a href="https://github.com/sarwaaaar/savant" target="_blank" style="color:inherit; text-decoration:none;">SAVANT</a>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
+                <a href="https://github.com/sarwaaaar/blackwall" target="_blank" style="color:inherit; text-decoration:none;">BLACKWALL</a>
+              </div>
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
+                <a href="https://github.com/504sarwarerror/CASM" target="_blank" style="color:inherit; text-decoration:none;">CASM</a>
+              </div>
+
+              
+            </div>
+          </div>
+
+          <div class="splitter-h"></div>
 
           <div
             class="panel flex flex-col"
             style="height: 280px"
-            id="programTreePanel"
+            id="writeupTreePanel"
           >
             <div class="panel-header">
-              <span class="flex items-center gap-2"> Program Tree </span>
+              <span class="flex items-center gap-2"> Writeup Tree </span>
               <span class="cursor-pointer">X</span>
             </div>
             <div class="flex border-b border-gray-300">
               <div class="tab active">
-                <span>bartmoss50_winx86-64</span>
+                <span>Writeups</span>
                 <span class="close-btn">X</span>
               </div>
             </div>
@@ -647,125 +625,29 @@
                   alt="Folder"
                   class="icon-img"
                 />
-                <span>bartmoss50_winx86-64</span>
+                <span>Writeups</span>
               </div>
               <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.bss</span>
+                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
+                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki" target="_blank" style="color:inherit; text-decoration:none;">Sarwar's Guide to Creating Malware</a>
               </div>
               <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.class</span>
+                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
+                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills" target="_blank" style="color:inherit; text-decoration:none;">ATM Jackpotting Spitting Out Bills</a>
               </div>
               <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.data</span>
+                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
+                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it" target="_blank" style="color:inherit; text-decoration:none;">Userland Rootkit's and the Code Behind it</a>
               </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.got.plt</span>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.got</span>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.dynamic</span>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.fini_array</span>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="File" class="icon-img" />
-                <span>.init_array</span>
-              </div>
+
             </div>
             <div class="border-t border-gray-300 p-1">
               <div
                 class="tab active"
                 style="display: inline-flex; font-size: 10px"
               >
-                <span>Program Tree</span>
+                <span>Writeup Tree</span>
                 <span class="close-btn ml-2">X</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="splitter-h"></div>
-
-          <div class="panel flex flex-col flex-1" id="symbolTreePanel">
-            <div class="panel-header">
-              <span class="flex items-center gap-2"> Symbol Tree </span>
-              <span class="cursor-pointer">X</span>
-            </div>
-            <div class="p-2 border-b border-gray-300 bg-yellow-100">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold">Filter:</span>
-                <input type="text" class="filter-input flex-1" value="main" />
-                <span class="close-btn text-yellow-600">X</span>
-              </div>
-            </div>
-            <div class="flex-1 overflow-auto p-2">
-              <div class="tree-item">
-                <span>▼</span>
-                <img
-                  src="ASSETS/icons/stfl.png"
-                  alt="Folder"
-                  class="icon-img"
-                />
-                <span>Imports</span>
-              </div>
-              <div class="tree-item pl-6">
-                <span>▼</span>
-                <img src="ASSETS/icons/stb.png" alt="Folder" class="icon-img" />
-                <span>&lt;EXTERNAL&gt;</span>
-              </div>
-              <div class="tree-item pl-12">
-                <span>►</span>
-                <img
-                  src="ASSETS/icons/stf.png"
-                  alt="Function"
-                  class="icon-img"
-                />
-                <span style="color: #800080">__libc_start_m</span>
-              </div>
-              <div class="tree-item">
-                <span>▼</span>
-                <img
-                  src="ASSETS/icons/stfl.png"
-                  alt="Folder"
-                  class="icon-img"
-                />
-                <span>Exports</span>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img
-                  src="ASSETS/icons/stb.png"
-                  alt="Function"
-                  class="icon-img"
-                />
-                <span style="color: #800080">main</span>
-              </div>
-              <div class="tree-item">
-                <span>▼</span>
-                <img
-                  src="ASSETS/icons/stfl.png"
-                  alt="Functions"
-                  class="icon-img"
-                />
-                <span>Functions</span>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img
-                  src="ASSETS/icons/stb.png"
-                  alt="Function"
-                  class="icon-img"
-                />
-                <span style="color: #800080">__libc_start_mai</span>
               </div>
             </div>
           </div>
@@ -778,7 +660,7 @@
             id="dataTypesPanel"
           >
             <div class="panel-header">
-              <span class="flex items-center gap-2"> Data Type Manager </span>
+              <span class="flex items-center gap-2"> Link Type Manager </span>
               <div class="flex gap-1">
                 <span class="cursor-pointer">▼</span>
                 <span class="cursor-pointer">X</span>
@@ -787,37 +669,31 @@
             <div class="toolbar border-b border-gray-300">
               <img
                 src="ASSETS/icons/dtmbar.png"
-                alt="Data Type Manager Toolbar"
+                alt="Link Manager Toolbar"
                 style="width: 100%; height: auto"
               />
             </div>
             <div class="flex-1 overflow-auto p-2">
               <div class="tree-item">
                 <span>▼</span>
-                <img
-                  src="ASSETS/icons/dtm.png"
-                  alt="Data Types"
-                  class="icon-img"
-                />
-                <span>Data Types</span>
+                <img src="ASSETS/icons/dtm.png" alt="Links" class="icon-img" />
+                <span>Links</span>
               </div>
               <div class="tree-item pl-6">
                 <span>►</span>
-                <img
-                  src="ASSETS/icons/dtmby.png"
-                  alt="Built-in"
-                  class="icon-img"
-                />
-                <span>BuiltInTypes</span>
+                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
+                <a href="https://github.com/sarwaaaar/rabids" target="_blank" style="color:inherit; text-decoration:none;">Projects (RABIDS)</a>
               </div>
               <div class="tree-item pl-6">
                 <span>►</span>
-                <img
-                  src="ASSETS/icons/dtmbr.png"
-                  alt="Program"
-                  class="icon-img"
-                />
-                <span>bartmoss50_winx86-64</span>
+                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
+                <a href="https://github.com/504sarwarerror" target="_blank" style="color:inherit; text-decoration:none;">Contact (GitHub)</a>
+              </div>
+              <!-- Donate link removed -->
+              <div class="tree-item pl-6">
+                <span>►</span>
+                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
+                <a href="https://discord.gg/aWeFF8cfAn" target="_blank" style="color:inherit; text-decoration:none;">Discord</a>
               </div>
             </div>
             <div class="border-t border-gray-300 p-2 bg-[#D8D7E1]">
@@ -856,19 +732,16 @@
           assembly: `
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Function: main</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Entry point for SARWAR "BARTMOSS" profile</span>
+              <span class="comment">; Entry point for SARWAR "BARTMOSS"</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
             </div>
             <div class="code-line">
               <span class="address">00401000</span><span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span><span class="operand">RBP</span><span class="comment">; Establish stack frame</span>
@@ -878,31 +751,24 @@
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Load and display identity ---</span>
             </div>
             <div class="code-line">
-              <span class="address">00401004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_identity_string]</span><span class="comment">; RDI = "hey — i'm SARWAR..."</span>
+              <span class="address">00401004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI</span><span class="comment">; RDI = "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have the power of c in assembly directly and also i am the creator of RABIDS a modular malware generation toolkit"</span>
             </div>
             <div class="code-line">
-              <span class="address">0040100b</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_text</span><span class="comment">; Print identity to console</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Initialize and display core competencies ---</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Display philosophy ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401042</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_philosophy_string]</span><span class="comment">; RDI = "i'm not here for glory..."</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401049</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_text</span><span class="comment">; Print philosophy to console</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Clean up and exit ---</span>
+            </div>
+            <div class="code-line">
+            </div>
+            <div class="code-line">
+            </div>
+            <div class="code-line">
+              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
             </div>
             <div class="code-line">
               <span class="address">0040104e</span><span class="bytes">b8 00 00 00 00</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">EAX, 0x0</span><span class="comment">; Return 0</span>
@@ -983,10 +849,10 @@
               <span class="address">00402011</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display RABIDS details</span>
             </div>
             <div class="code-line">
-              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hey — i'm SARWAR, known as BARTMOSS...", 0</span>
+              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have th epower of c in assembly direcly and also i am the creator of RABIDS a modular malware denration toolkit", 0</span>
             </div>
             <div class="code-line">
-              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "i'm not here for glory; i'm here to understand the machine...", 0</span>
+              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "", 0</span>
             </div>
             <div class="code-line">
               <span class="address">0040201d</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display SAVANT details</span>
@@ -1006,10 +872,10 @@
               <span class="comment">; --- Data Section ---</span>
             </div>
             <div class="code-line">
-              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hey — i'm SARWAR, known as BARTMOSS...", 0</span>
+              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have th epower of c in assembly direcly and also i am the creator of RABIDS a modular malware denration toolkit", 0</span>
             </div>
             <div class="code-line">
-              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "i'm not here for glory; i'm here to understand the machine...", 0</span>
+              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "", 0</span>
             </div>
             <div class="code-line">
               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
@@ -1146,79 +1012,7 @@
            `,
           decompile: ``,
         },
-        donate: {
-          assembly: `
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; ===================================================================</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; Support / Donate</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; Click the links below to open the QR codes.</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; ===================================================================</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; --- Data Section ---</span>
-             </div>
-             <div class="code-line">
-               <span class="address">00406100</span><span class="bytes">...</span><span class="mnemonic">s_support_message</span><span class="operand">DB "If you find my research and tools valuable, consider supporting my work:", 0</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">
-                 ; <a href="ASSETS/QRC.jpg" target="_blank" class="comment">BTC Donation (QR)</a>
-               </span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">
-                 ; <a href="ASSETS/QRCETH.jpg" target="_blank" class="comment">ETH Donation (QR)</a>
-               </span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; --- Data Section ---</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; --- Load support message ---</span>
-             </div>
-             <div class="code-line">
-               <span class="address">00406000</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_support_message]</span><span class="comment">; Load support message</span>
-             </div>
-             <div class="code-line">
-               <span class="address">00406007</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">printf</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; --- Display QR Codes ---</span>
-             </div>
-             <div class="code-line">
-               <span class="address">0040600c</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_qr_codes</span>
-             </div>
-             <div class="code-line" style="margin-top: 10px;">
-               <span class="address">00406011</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-             </div>
-           `,
-          decompile: ``,
-        },
+        
         chatroom: {
           assembly: `
             <div class="code-line">
@@ -1394,7 +1188,7 @@
       }
 
       // Set initial mobile tab
-      switchMobileTab("programTreePanel");
+  switchMobileTab("symbolTreePanel");
 
       // Chatroom Logic
       function initChatroom() {
@@ -1843,64 +1637,7 @@
            `,
           decompile: ``,
         },
-        donate: {
-          assembly: `
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; ===================================================================</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; Support / Donate</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; Click the links below to open the QR codes.</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span>
-               <span class="bytes"></span>
-               <span class="mnemonic"></span>
-               <span class="operand"></span>
-               <span class="comment">; ===================================================================</span>
-             </div>
-             <div class="code-line">
-               <span class="address">00406000</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_support_message]</span><span class="comment">; Load support message</span>
-             </div>
-             <div class="code-line">
-               <span class="address">00406007</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">printf</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">; --- Display QR Codes ---</span>
-             </div>
-             <div class="code-line">
-               <span class="address">0040600c</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">display_qr_codes</span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">
-                 ; <a href="../504SARWARERROR/ASSETS/QRC.jpg" target="_blank" class="comment">BTC Donation (QR)</a>
-               </span>
-             </div>
-             <div class="code-line">
-               <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-               <span class="comment">
-                 ; <a href="../504SARWARERROR/ASSETS/QRCETH.jpg" target="_blank" class="comment">ETH Donation (QR)</a>
-               </span>
-             </div>
-             <div class="code-line" style="margin-top: 10px;">
-               <span class="address">00406011</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-             </div>
-           `,
-          decompile: ``,
-        },
+        
         chatroom: {
           assembly: `
             <div class="code-line">
@@ -2076,7 +1813,7 @@
       }
 
       // Set initial mobile tab
-      switchMobileTab("programTreePanel");
+  switchMobileTab("symbolTreePanel");
 
       // Chatroom Logic
       function initChatroom() {
