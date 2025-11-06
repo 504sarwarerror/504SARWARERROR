@@ -216,6 +216,7 @@
       color: #7C71DA;
       font-size: 13px;
       position: relative;
+      opacity: 1;
     }
 
     .popup-header {
@@ -250,7 +251,13 @@
       line-height: 1.6;
       position: relative;
       z-index: 1001;
-      color: #7C71DA;
+      color: #7C71DA !important;
+    }
+    
+    .popup-content .terminal-line {
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+      color: #7C71DA !important;
     }
 
     .item-box {
@@ -266,7 +273,7 @@
     .item-box:hover {
       border-color: #FFFFFF;
       color: #FFFFFF;
-      background: rgba(0, 0, 20);
+      background: rgba(0, 0, 20, 0.3);
     }
 
     .item-title {
