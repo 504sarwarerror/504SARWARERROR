@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BARTMOSS Terminal</title>
+  <title>BARTMOSS - C64 Terminal</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -56,7 +56,7 @@
           rgba(0, 0, 0, 0.15) 50%);
       background-size: 100% 3px;
       pointer-events: none;
-      z-index: 1000;
+      z-index: 99999;
       animation: scanlineMove 8s linear infinite;
     }
 
@@ -78,7 +78,7 @@
       bottom: 0;
       background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
       pointer-events: none;
-      z-index: 999;
+      z-index: 99998;
     }
 
     .flicker {
@@ -146,7 +146,6 @@
 
     .menu-item:hover {
       color: #FFFFFF;
-      text-shadow: 0 0 8px #FFFFFF;
     }
 
     .menu-item:hover::before {
