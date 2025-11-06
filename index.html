@@ -56,7 +56,7 @@
           rgba(0, 0, 0, 0.15) 50%);
       background-size: 100% 3px;
       pointer-events: none;
-      z-index: 1000;
+      z-index: 9999;
       animation: scanlineMove 8s linear infinite;
     }
 
@@ -78,7 +78,7 @@
       bottom: 0;
       background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
       pointer-events: none;
-      z-index: 999;
+      z-index: 9998;
     }
 
     .flicker {
@@ -301,6 +301,7 @@
       background: rgba(0, 0, 20, 0.3);
       color: #FFFFFF;
       border-color: #FFFFFF;
+      text-shadow: 0 0 8px #FFFFFF;
     }
 
     .highlight {
