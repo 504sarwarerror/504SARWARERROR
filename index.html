@@ -339,6 +339,57 @@
       }
     }
 
+    .power-on-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #A5A5FF;
+      z-index: 10000;
+      animation: powerOn 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes powerOn {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .disk-activity {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 15px;
+      height: 15px;
+      background: #FF0000;
+      border-radius: 50%;
+      opacity: 0;
+      z-index: 1002;
+      box-shadow: 0 0 10px #FF0000;
+    }
+
+    .disk-activity.active {
+      animation: diskBlink 0.3s ease-in-out infinite;
+    }
+
+    @keyframes diskBlink {
+      0%, 100% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
     @media (max-width: 768px) {
       .c64-screen {
         padding: 20px 30px;
@@ -359,6 +410,12 @@
 </head>
 
 <body>
+  <!-- Power-on flash effect -->
+  <div class="power-on-flash"></div>
+  
+  <!-- Disk drive activity LED -->
+  <div class="disk-activity" id="diskLED"></div>
+
   <div class="c64-screen flicker">
     <div class="scanline"></div>
     <div class="crt-effect"></div>
@@ -472,6 +529,15 @@
       { title: '> WIKI', desc: 'TECHNICAL WRITEUPS & RESEARCH', url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki' }
     ];
 
+    // Disk drive activity simulator
+    function showDiskActivity(duration = 1000) {
+      const led = document.getElementById('diskLED');
+      led.classList.add('active');
+      setTimeout(() => {
+        led.classList.remove('active');
+      }, duration);
+    }
+
     function typeWriter(element, text, speed = 30, callback) {
       let i = 0;
       element.innerHTML = '';
@@ -503,6 +569,9 @@
     async function bootSequence() {
       const container = document.getElementById('bootSequence');
 
+      // Show disk activity during boot
+      showDiskActivity(800);
+
       await addLine(container, '    **** COMMODORE 64 BASIC V2 ****', 100);
       await addLine(container, '', 50);
       await addLine(container, ' 64K RAM SYSTEM 38911 BASIC BYTES FREE', 100);
@@ -510,6 +579,9 @@
       await addLine(container, 'READY.', 200);
       await addLine(container, 'LOAD"BARTMOSS.SYS",8', 300);
       await addLine(container, '', 100);
+      
+      // Disk activity during search
+      showDiskActivity(2000);
       await addLine(container, 'SEARCHING FOR BARTMOSS.SYS', 200);
 
       const loadingLine = document.createElement('div');
@@ -533,10 +605,13 @@
       await addLine(container, 'READY.', 200);
       await addLine(container, 'RUN', 300);
       await addLine(container, '', 100);
-      await addLine(container, '================================', 100);
+      
+      // Add classic C64 border characters
       await addLine(container, 'SARWAR "BARTMOSS" TERMINAL', 100);
-      await addLine(container, '================================', 100);
       await addLine(container, '', 100);
+      await addLine(container, 'SYS 64738', 150);
+      await addLine(container, '> SYSTEM INITIALIZED', 150);
+      await addLine(container, '', 200);
       await addLine(container, '0 "SYSTEM     " 00 2A', 200);
       await addLine(container, '', 100);
 
@@ -563,6 +638,9 @@
     async function loadAbout() {
       const content = document.getElementById('aboutContent');
       content.innerHTML = '';
+
+      // Show disk activity
+      showDiskActivity(1500);
 
       await addLine(content, 'SEARCHING FOR ABOUT.PRG', 100);
       const loadLine = document.createElement('div');
@@ -620,6 +698,9 @@
       const content = document.getElementById('projectsContent');
       content.innerHTML = '';
 
+      // Show disk activity
+      showDiskActivity(1500);
+
       await addLine(content, 'SEARCHING FOR PROJECTS.PRG', 100);
       const loadLine = document.createElement('div');
       loadLine.className = 'terminal-line';
@@ -663,6 +744,9 @@
       const content = document.getElementById('writeupsContent');
       content.innerHTML = '';
 
+      // Show disk activity
+      showDiskActivity(1500);
+
       await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
       const loadLine = document.createElement('div');
       loadLine.className = 'terminal-line';
@@ -705,6 +789,9 @@
     async function loadLinks() {
       const content = document.getElementById('linksContent');
       content.innerHTML = '';
+
+      // Show disk activity
+      showDiskActivity(1500);
 
       await addLine(content, 'SEARCHING FOR LINKS.PRG', 100);
       const loadLine = document.createElement('div');
