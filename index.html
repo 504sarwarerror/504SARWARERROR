@@ -1,2243 +1,784 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SARWAR "BARTMOSS"</title>
-    <link rel="icon" href="ASSETS/favicon.png" type="image/jpeg" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BARTMOSS - C64 Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .c64-screen {
+      background: #3939C4;
+      width: 100vw;
+      height: 100vh;
+      color: #7C71DA;
+      padding: 40px 60px;
+      font-size: 13px;
+      text-transform: uppercase;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .scanline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom,
+          transparent 50%,
+          rgba(0, 0, 0, 0.15) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: scanlineMove 8s linear infinite;
+    }
+
+    @keyframes scanlineMove {
+      0% {
+        transform: translateY(0);
       }
 
-      /* Hide scrollbars for all elements */
-      ::-webkit-scrollbar {
-        display: none;
+      100% {
+        transform: translateY(3px);
+      }
+    }
+
+    .crt-effect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .flicker {
+      animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+
+      0%,
+      100% {
+        opacity: 1;
       }
 
-      /* Hide scrollbars for Firefox and IE/Edge */
-      * {
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE and Edge */
+      50% {
+        opacity: 0.95;
+      }
+    }
+
+    .terminal-line {
+      margin: 5px 0;
+      line-height: 1.4;
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 12px;
+      height: 18px;
+      background: #7C71DA;
+      animation: blink 0.8s infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50% {
+        opacity: 1;
       }
 
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #e0e0e0;
-        overflow: hidden;
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .header {
+      margin-bottom: 25px;
+    }
+
+    .menu-item {
+      cursor: pointer;
+      padding: 3px 0;
+      transition: all 0.1s;
+      position: relative;
+    }
+
+    .menu-item:hover {
+      color: #FFFFFF;
+      text-shadow: 0 0 8px #FFFFFF;
+    }
+
+    .menu-item:hover::before {
+      content: '>';
+      position: absolute;
+      left: -20px;
+      animation: arrowBounce 0.5s infinite;
+    }
+
+    @keyframes arrowBounce {
+
+      0%,
+      100% {
+        transform: translateX(0);
       }
 
-      .window {
-        display: flex;
-        flex-direction: column;
-        height: 100dvh;
-        background: #f0f0f0;
-        box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080;
+      50% {
+        transform: translateX(5px);
+      }
+    }
+
+    .loading-bar {
+      display: inline-block;
+    }
+
+    .loading-char {
+      display: inline-block;
+      animation: load 0.3s ease-in-out;
+    }
+
+    @keyframes load {
+      0% {
+        opacity: 0;
+        transform: scale(0);
       }
 
-      .title-bar {
-        background: linear-gradient(to right, #000080, #1084d0);
-        color: white;
-        padding: 4px 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-weight: bold;
-        font-size: 14px;
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s;
+    }
+
+    .popup-window {
+      background: #3939C4;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 40px 60px;
+      color: #7C71DA;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .popup-header {
+      border-bottom: 1px solid #7C71DA;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1001;
+    }
+
+    .close-btn {
+      cursor: pointer;
+      padding: 8px 20px;
+      background: transparent;
+      border: 2px solid #7C71DA;
+      color: #7C71DA;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #FFFFFF;
+      border-color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .popup-content {
+      line-height: 1.6;
+      position: relative;
+      z-index: 1001;
+      color: #7C71DA;
+    }
+
+    .item-box {
+      border: 1px solid #7C71DA;
+      padding: 15px;
+      margin: 15px 0;
+      cursor: pointer;
+      background: transparent;
+      color: #7C71DA;
+      transition: all 0.2s;
+    }
+
+    .item-box:hover {
+      border-color: #FFFFFF;
+      color: #FFFFFF;
+      background: rgba(0, 0, 20, 0.3);
+    }
+
+    .item-title {
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .item-desc {
+      font-size: 9px;
+      line-height: 1.5;
+      color: #9B93E0;
+    }
+
+    .link-box {
+      border: 1px solid #7C71DA;
+      padding: 12px;
+      margin: 10px 0;
+      cursor: pointer;
+      background: transparent;
+      color: #7C71DA;
+      transition: all 0.2s;
+    }
+
+    .link-box:hover {
+      background: rgba(0, 0, 20, 0.3);
+      color: #FFFFFF;
+      border-color: #FFFFFF;
+    }
+
+    .highlight {
+      color: #FFFFFF;
+    }
+
+    .typewriter {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid #7C71DA;
+      animation: typing 2s steps(40) 1s forwards, blink-border 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from {
+        width: 0;
       }
 
-      .title-bar-controls {
-        display: flex;
-        gap: 4px;
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes blink-border {
+      50% {
+        border-color: transparent;
+      }
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
       }
 
-      .title-bar-btn {
-        width: 20px;
-        height: 20px;
-        background: #c0c0c0;
-        border: 2px solid;
-        border-color: #fff #000 #000 #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 12px;
-        color: #000;
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translateX(-5px);
       }
 
-      .menu-bar {
-        background: #f0f0f0;
-        border-bottom: 2px solid #808080;
-        display: flex;
-        padding: 2px;
-        overflow-x: auto;
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .c64-screen {
+        padding: 20px 30px;
+        font-size: 10px;
       }
 
-      .menu-item {
-        padding: 4px 12px;
-        cursor: pointer;
-        font-size: 13px;
-        white-space: nowrap;
-      }
-
-      .menu-item:hover {
-        background: #000080;
-        color: white;
-      }
-
-      .toolbar {
-        background: #d7dbe1;
-        border-bottom: 2px solid #808080;
-        padding: 4px;
-        display: flex;
-        gap: 2px;
-        align-items: center;
-      }
-
-      .toolbar-btn {
-        padding: 4px 8px;
-        border: 2px solid;
-        border-color: #fff #000 #000 #fff;
-        background: #c0c0c0;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .toolbar-btn:active {
-        border-color: #000 #fff #fff #000;
-      }
-
-      .icon-img {
-        width: 16px;
-        height: 16px;
-        display: inline-block;
-      }
-
-      .main-content {
-        flex: 1;
-        display: flex;
-        overflow: hidden;
-        background: #f0f0f0;
-      }
-
-      .panel {
-        background: #fff;
-        border: 2px solid;
-        border-color: #808080 #fff #fff #808080;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .panel-header {
-        background: linear-gradient(to bottom, #dfdfdf, #dfdfdf);
-        padding: 4px 8px;
-        border-bottom: 2px solid #808080;
-        font-weight: bold;
-        font-size: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .tab {
-        padding: 4px 12px;
-        background: #d0d0d0;
-        border: 1px solid #808080;
-        border-bottom: none;
-        cursor: pointer;
-        font-size: 11px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .tab.active {
-        background: #fff;
-        border-top: 2px solid #000080;
+      .popup-window {
+        padding: 20px 30px;
+        font-size: 10px;
       }
 
       .close-btn {
-        cursor: pointer;
-        font-weight: bold;
-        color: #666;
+        padding: 6px 15px;
+        font-size: 9px;
       }
+    }
+  </style>
+</head>
 
-      .close-btn:hover {
-        color: #000;
-      }
+<body>
+  <div class="c64-screen flicker">
+    <div class="scanline"></div>
+    <div class="crt-effect"></div>
 
-      .tree-item {
-        padding: 2px 4px;
-        cursor: pointer;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        user-select: none;
-      }
+    <div id="bootSequence"></div>
+  </div>
 
-      .tree-item:hover {
-        background: #e0e0ff;
-      }
-
-      .filter-input {
-        width: 100%;
-        padding: 2px 4px;
-        border: 2px solid;
-        border-color: #808080 #fff #fff #808080;
-        font-size: 11px;
-      }
-
-      .code-view {
-        flex: 1;
-        overflow: auto;
-        font-family: "Courier New", monospace;
-        font-size: 12px;
-        padding: 8px;
-        background: #fff;
-      }
-
-      .code-line {
-        display: flex;
-        gap: 12px;
-        padding: 2px 0;
-        line-height: 1.4;
-        align-items: flex-start; /* allow multi-line children to wrap */
-      }
-
-      .address {
-        color: #0000ff;
-        font-weight: bold;
-        min-width: 80px;
-      }
-
-      .bytes {
-        color: #666;
-        min-width: 100px;
-      }
-
-      .mnemonic {
-        /* Removed generic color, specific colors defined below */
-        font-weight: bold;
-        min-width: 60px;
-      }
-
-      /* Specific mnemonic colors */
-      .mnemonic.mnemonic-PUSH {
-        color: #00008b;
-      } /* Dark Blue */
-      .mnemonic.mnemonic-MOV {
-        color: #ffa500;
-      } /* Orange */
-      .mnemonic.mnemonic-LEA {
-        color: #800080;
-      } /* Purple */
-      .mnemonic.mnemonic-CALL {
-        color: #008000;
-      } /* Green */
-      .mnemonic.mnemonic-RET {
-        color: #ff0000;
-      } /* Red */
-      .mnemonic.mnemonic-JMP {
-        color: #00ffff;
-      } /* Cyan */
-      .mnemonic.mnemonic-ADD {
-        color: #a52a2a;
-      } /* Brown */
-      .mnemonic.mnemonic-DEC {
-        color: #006400;
-      } /* Dark Green */
-      .mnemonic.mnemonic-JNZ {
-        color: #ff8c00;
-      } /* Dark Orange */
-      .mnemonic.mnemonic-POP {
-        color: #0000ff;
-      } /* Blue */
-
-      .operand {
-        color: #000;
-        min-width: 0; /* allow flex children to shrink */
-        flex: 1 1 auto; /* allow operands to grow and wrap */
-        white-space: pre-wrap; /* preserve spacing and wrap long text */
-        word-break: break-word;
-      }
-
-      .comment {
-        color: #008000;
-        font-style: italic;
-        min-width: 0;
-        flex: 1 1 auto;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-
-      .comment a,
-      a.comment {
-        color: #4169e1; /* Royal Blue */
-        text-decoration: underline;
-        cursor: pointer;
-      }
-
-      .line-number {
-        color: #999;
-        min-width: 40px;
-        text-align: right;
-        user-select: none;
-      }
-
-      .keyword {
-        color: #0000ff;
-        font-weight: bold;
-      }
-
-      .function {
-        color: #795e26;
-      }
-
-      .string {
-        color: #a31515;
-      }
-
-      .number {
-        color: #098658;
-      }
-
-      .splitter-v {
-        width: 4px;
-        background: #c0c0c0;
-        cursor: col-resize;
-        border-left: 1px solid #808080;
-        border-right: 1px solid #fff;
-        position: relative;
-      }
-
-      .splitter-v:hover {
-        background: #a0a0a0;
-      }
-
-      .splitter-h {
-        height: 4px;
-        background: #c0c0c0;
-        cursor: row-resize;
-        border-top: 1px solid #808080;
-        border-bottom: 1px solid #fff;
-      }
-
-      .splitter-h:hover {
-        background: #a0a0a0;
-      }
-
-      /* Added mobile responsive styles */
-      @media (max-width: 768px) {
-        .main-content {
-          flex-direction: column;
-        }
-
-        .splitter-v {
-          display: none;
-        }
-
-        /* On mobile, hide the vertical panels and splitters inside the tabbed view */
-        #leftPanel .panel,
-        #leftPanel .splitter-h {
-          display: none;
-        }
-      }
-
-      /* Chatroom Styles */
-      .chatroom-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #fff;
-        color: #000;
-        overflow: hidden;
-        position: relative;
-      }
-      .chatroom-container .messages {
-        flex: 1;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 8px;
-      }
-      .chatroom-container .msg {
-        padding: 6px 10px;
-        border-radius: 3px;
-        max-width: 85%;
-        font-size: 12px;
-        position: relative;
-        overflow-wrap: break-word;
-        background: #f0f0f0;
-        border: 1px solid #d0d0d0;
-      }
-      .chatroom-container .msg.mine {
-        background: #e0e8f0;
-        border-color: #c0d0e0;
-        align-self: flex-end;
-      }
-      .chatroom-container .msg img {
-        max-width: 120px;
-        max-height: 120px;
-        display: block;
-        margin-top: 6px;
-        border: 1px solid #808080;
-      }
-      .chatroom-container .meta {
-        font-size: 10px;
-        margin-bottom: 4px;
-        color: #666;
-      }
-      .chatroom-container .username {
-        font-weight: bold;
-        color: #000080;
-      }
-      .chatroom-container .composer-wrapper {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        padding: 4px;
-        background: #f0f0f0;
-        border-top: 2px solid #808080;
-      }
-      .chatroom-container .composer {
-        display: flex;
-        width: 100%;
-        gap: 4px;
-        align-items: center;
-      }
-      .chatroom-container .composer input {
-        flex: 1;
-        padding: 4px 6px;
-        font-size: 12px;
-        border: 2px solid;
-        border-color: #808080 #fff #fff #808080;
-        font-family: inherit;
-      }
-      .chatroom-container .composer .toolbar-btn {
-        height: 28px;
-        width: 28px;
-        font-size: 16px;
-        flex-shrink: 0;
-      }
-      .chatroom-container .settings-dropdown {
-        position: absolute;
-        bottom: 40px;
-        right: 4px;
-        background: #f0f0f0;
-        border: 2px solid;
-        border-color: #fff #808080 #808080 #fff;
-        padding: 8px;
-        z-index: 3;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        width: 220px;
-      }
-      .chatroom-container .settings-dropdown label {
-        font-size: 12px;
-      }
-      .chatroom-container .settings-dropdown input {
-        padding: 4px;
-        border: 2px solid;
-        border-color: #808080 #fff #fff #808080;
-        font-family: inherit;
-        font-size: 12px;
-      }
-      .chatroom-container .settings-dropdown button {
-        padding: 4px 8px;
-        border: 2px solid;
-        border-color: #fff #000 #000 #fff;
-        background: #c0c0c0;
-        cursor: pointer;
-        font-family: inherit;
-        width: 100%;
-        margin-top: 4px;
-      }
-      .chatroom-container .skeleton-msg {
-        padding: 10px 12px;
-        max-width: 80%;
-        background: #f0f0f0;
-        height: 50px;
-        border: 1px solid #e0e0e0;
-        position: relative;
-        overflow: hidden;
-      }
-      .chatroom-container .skeleton-msg .skeleton-line {
-        height: 12px;
-        background: #e0e0e0;
-        margin-bottom: 8px;
-      }
-      .chatroom-container .skeleton-msg::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -150%;
-        width: 150%;
-        height: 100%;
-        background: linear-gradient(
-          to right,
-          transparent 0%,
-          rgba(255, 255, 255, 0.5) 50%,
-          transparent 100%
-        );
-        animation: shimmer 1.5s infinite;
-      }
-      @keyframes shimmer {
-        0% { left: -150%; }
-        100% { left: 150%; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="window">
-      <div class="title-bar">
-        <div class="flex items-center gap-2">
-          <img src="ASSETS/ghidra.png" alt="Ghidra Icon" class="icon-img" />
-          <span>BARTMOSS bartmoss50_winx86-64</span>
-        </div>
-        <div class="title-bar-controls">
-          <div class="title-bar-btn">_</div>
-          <div class="title-bar-btn">□</div>
-          <div class="title-bar-btn">X</div>
-        </div>
+  <!-- About Popup -->
+  <div class="popup-overlay" id="popup-about">
+    <div class="popup-window flicker">
+      <div class="scanline"></div>
+      <div class="crt-effect"></div>
+      <div class="popup-header">
+        <div>LOAD"ABOUT.PRG",8,1</div>
+        <button class="close-btn" onclick="closePopup('about')">X</button>
       </div>
-
-      <div class="menu-bar">
-        <div class="menu-item" onclick="switchContent('about')">About</div>
-        <div class="menu-item" onclick="switchContent('chatroom')">Chatroom</div>
-      </div>
-
-      <div class="toolbar">
-        <img
-          src="ASSETS/icons/toolbar.png"
-          alt="Toolbar"
-          style="height: 24px; min-width: max-content"
-        />
-      </div>
-
-      <div class="main-content">
-        <div
-          class="flex flex-col mobile-row mobile-row-small"
-          style="width: 280px"
-          id="leftPanel"
-        >
-          <!-- Mobile-only Tab Navigation -->
-          <div class="menu-bar md:hidden" id="mobileNav">
-            <div
-              class="menu-item mobile-tab active"
-              onclick="switchMobileTab('symbolTreePanel')"
-            >
-              Projects Tree
-            </div>
-            <div
-              class="menu-item mobile-tab"
-              onclick="switchMobileTab('writeupTreePanel')"
-            >
-              Writeup Tree
-            </div>
-            <div
-              class="menu-item mobile-tab"
-              onclick="switchMobileTab('dataTypesPanel')"
-            >
-              Link Type Manager
-            </div>
-          </div>
-
-          <div class="panel flex flex-col flex-1" id="symbolTreePanel">
-            <div class="panel-header">
-              <span class="flex items-center gap-2"> Projects Tree </span>
-              <span class="cursor-pointer">X</span>
-            </div>
-            <div class="p-2 border-b border-gray-300 bg-yellow-100">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold">Filter:</span>
-                <input type="text" class="filter-input flex-1" value="main" />
-                <span class="close-btn text-yellow-600">X</span>
-              </div>
-            </div>
-            <div class="flex-1 overflow-auto p-2">
-              <!-- Projects Folder -->
-              <div class="tree-item">
-                <span>▼</span>
-                <img src="ASSETS/icons/stfl.png" alt="Folder" class="icon-img" />
-                <span>Projects</span>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
-                <a href="https://github.com/sarwaaaar/rabids" target="_blank" style="color:inherit; text-decoration:none;">RABIDS</a>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
-                <a href="https://github.com/sarwaaaar/savant" target="_blank" style="color:inherit; text-decoration:none;">SAVANT</a>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
-                <a href="https://github.com/sarwaaaar/blackwall" target="_blank" style="color:inherit; text-decoration:none;">BLACKWALL</a>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Project" class="icon-img" />
-                <a href="https://github.com/504sarwarerror/CASM" target="_blank" style="color:inherit; text-decoration:none;">CASM</a>
-              </div>
-
-              
-            </div>
-          </div>
-
-          <div class="splitter-h"></div>
-
-          <div
-            class="panel flex flex-col"
-            style="height: 280px"
-            id="writeupTreePanel"
-          >
-            <div class="panel-header">
-              <span class="flex items-center gap-2"> Writeup Tree </span>
-              <span class="cursor-pointer">X</span>
-            </div>
-            <div class="flex border-b border-gray-300">
-              <div class="tab active">
-                <span>Writeups</span>
-                <span class="close-btn">X</span>
-              </div>
-            </div>
-            <div class="flex-1 overflow-auto p-2">
-              <div class="tree-item">
-                <span>▼</span>
-                <img
-                  src="ASSETS/icons/ptfl.png"
-                  alt="Folder"
-                  class="icon-img"
-                />
-                <span>Writeups</span>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
-                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki" target="_blank" style="color:inherit; text-decoration:none;">Sarwar's Guide to Creating Malware</a>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
-                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills" target="_blank" style="color:inherit; text-decoration:none;">ATM Jackpotting Spitting Out Bills</a>
-              </div>
-              <div class="tree-item pl-6">
-                <img src="ASSETS/icons/ptff.png" alt="Writeup" class="icon-img" />
-                <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it" target="_blank" style="color:inherit; text-decoration:none;">Userland Rootkit's and the Code Behind it</a>
-              </div>
-
-            </div>
-            <div class="border-t border-gray-300 p-1">
-              <div
-                class="tab active"
-                style="display: inline-flex; font-size: 10px"
-              >
-                <span>Writeup Tree</span>
-                <span class="close-btn ml-2">X</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="splitter-h"></div>
-
-          <div
-            class="panel flex flex-col"
-            style="height: 280px"
-            id="dataTypesPanel"
-          >
-            <div class="panel-header">
-              <span class="flex items-center gap-2"> Link Type Manager </span>
-              <div class="flex gap-1">
-                <span class="cursor-pointer">▼</span>
-                <span class="cursor-pointer">X</span>
-              </div>
-            </div>
-            <div class="toolbar border-b border-gray-300">
-              <img
-                src="ASSETS/icons/dtmbar.png"
-                alt="Link Manager Toolbar"
-                style="width: 100%; height: auto"
-              />
-            </div>
-            <div class="flex-1 overflow-auto p-2">
-              <div class="tree-item">
-                <span>▼</span>
-                <img src="ASSETS/icons/dtm.png" alt="Links" class="icon-img" />
-                <span>Links</span>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
-                <a href="https://github.com/sarwaaaar/rabids" target="_blank" style="color:inherit; text-decoration:none;">Projects (RABIDS)</a>
-              </div>
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
-                <a href="https://github.com/504sarwarerror" target="_blank" style="color:inherit; text-decoration:none;">Contact (GitHub)</a>
-              </div>
-              <!-- Donate link removed -->
-              <div class="tree-item pl-6">
-                <span>►</span>
-                <img src="ASSETS/icons/stb.png" alt="Link" class="icon-img" />
-                <a href="https://discord.gg/aWeFF8cfAn" target="_blank" style="color:inherit; text-decoration:none;">Discord</a>
-              </div>
-            </div>
-            <div class="border-t border-gray-300 p-2 bg-[#D8D7E1]">
-              <div class="text-xs mb-1">Filter:</div>
-              <div class="flex items-center gap-2">
-                <input type="text" class="filter-input flex-1" />
-                <img
-                  src="ASSETS/icons/filter.png"
-                  alt="Search"
-                  class="icon-img"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="splitter-v" id="splitter1"></div>
-
-        <div
-          class="panel flex flex-col flex-1 mobile-row mobile-row-large"
-          id="centerPanel"
-        >
-          <div class="panel-header">
-            <span>Decompiler: bartmoss50_winx86-64</span>
-            <span class="cursor-pointer">X</span>
-          </div>
-          <div class="code-view" id="listingView"></div>
-        </div>
-      </div>
+      <div class="popup-content" id="aboutContent"></div>
     </div>
+  </div>
 
-    <script>
-      // Content data for different sections
-      const contentData = {
-        about: {
-          assembly: `
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Entry point for SARWAR "BARTMOSS"</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401000</span><span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span><span class="operand">RBP</span><span class="comment">; Establish stack frame</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401001</span><span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RBP, RSP</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401004</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI</span><span class="comment">; RDI = "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have the power of c in assembly directly and also i am the creator of RABIDS a modular malware generation toolkit"</span>
-            </div>
-            <div class="code-line">
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-            </div>
-            <div class="code-line">
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040104e</span><span class="bytes">b8 00 00 00 00</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">EAX, 0x0</span><span class="comment">; Return 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401053</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401054</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-            </div>
-           `,
-          decompile: ``,
-        },
-        projects: {
-          assembly: `
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Function: display_projects</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Iterates through project data and displays details.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Click the links below to view the projects.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402000</span><span class="bytes">bf 03 00 00 00</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">EDI, 0x3</span><span class="comment">; EDI = project_count</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402005</span><span class="bytes">48 8d 35 ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RSI, [project_array]</span><span class="comment">; RSI = &project_array</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040200c</span><span class="bytes">eb 1a</span><span class="mnemonic mnemonic-JMP">JMP</span><span class="operand">project_loop_entry</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Data definitions for projects ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402100</span><span class="bytes">...</span><span class="mnemonic">s_project_rabids</span><span class="operand">DB "RABIDS - Modular malware framework...", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/sarwaaaar/rabids" target="_blank" class="comment">github.com/sarwaaaar/rabids</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402180</span><span class="bytes">...</span><span class="mnemonic">s_project_savant</span><span class="operand">DB "SAVANT - RAG model trained on malware...", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/sarwaaaar/savant" target="_blank" class="comment">github.com/sarwaaaar/savant</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402200</span><span class="bytes">...</span><span class="mnemonic">s_project_blackwall</span><span class="operand">DB "BLACKWALL - Curated malware sample repository...", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/sarwaaaar/blackwall" target="_blank" class="comment">github.com/sarwaaaar/blackwall</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Project 1: RABIDS ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040200e</span><span class="bytes">48 8b 3e</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RDI, [RSI]</span><span class="comment">; Load project struct pointer</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402011</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display RABIDS details</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have th epower of c in assembly direcly and also i am the creator of RABIDS a modular malware denration toolkit", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040201d</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display SAVANT details</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Project 3: BLACKWALL ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402022</span><span class="bytes">48 83 c6 08</span><span class="mnemonic mnemonic-ADD">ADD</span><span class="operand">RSI, 0x8</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402026</span><span class="bytes">48 8b 3e</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RDI, [RSI]</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Data Section ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00401100</span><span class="bytes">...</span><span class="mnemonic">s_identity_string</span><span class="operand">DB "hi i am SARWAR also know as BARTMOSS, i am a low level malware dev that like to write malware in assembly, i created my own language called CASM (C ASsembly ) that let have th epower of c in assembly direcly and also i am the creator of RABIDS a modular malware denration toolkit", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address">004011A0</span><span class="bytes">...</span><span class="mnemonic">s_philosophy_string</span><span class="operand">DB "", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Load and display identity ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402029</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">show_project_details</span><span class="comment">; Display BLACKWALL details</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Loop control ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040202e</span><span class="bytes">ff cf</span><span class="mnemonic mnemonic-DEC">DEC</span><span class="operand">EDI</span><span class="comment">; project_count--</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402030</span><span class="bytes">75 dc</span><span class="mnemonic mnemonic-JNZ">JNZ</span><span class="operand">project_loop_start</span><span class="comment">; Loop if not zero</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00402032</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-            </div>
-           `,
-          decompile: ``,
-        },
-        writeups: {
-          data: [
-            {
-              title: "Sarwar's Guide to Creating Malware",
-              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki",
-              shortUrl: "github.com/504sarwarerror/504SARWARERROR/wiki",
-            },
-            {
-              title: "ATM Jackpotting Spitting Out Bills",
-              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills",
-              shortUrl: "github.com/.../ATM-Jackpotting-Spitting-Out-Bills",
-            },
-            {
-              title: "Userland Rootkit's and the Code Behind it",
-              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it",
-              shortUrl:
-                "github.com/.../Userland-Rootkit's-and-the-Code-Behind-it",
-            },
-            {
-              title: "Discord C2 Server and a Rat",
-              url: "https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat",
-              shortUrl: "github.com/.../Discord-C2-Server-and-a-Rat",
-            },
-          ],
-          assembly: `
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Function: open_research_papers</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Loads and presents research documents and writeups.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Click the links below to read the writeups.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403000</span><span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span><span class="operand">RBP</span><span class="comment">; Setup stack for document display routine</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00403001</span><span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span><span class="operand">RBP, RSP</span>
-            </div>
-           `,
-          decompile: ``,
-        },
-        contact: {
-          assembly: `
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Function: establish_contact_channels</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Provides links to external communication platforms.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; Click the links below to get in touch.</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; ===================================================================</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Data Section for Contact Links ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405100</span><span class="bytes">...</span><span class="mnemonic">s_contact_github</span><span class="operand">DB "GitHub Profile", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/504sarwarerror" target="_blank" class="comment">github.com/504sarwarerror</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405180</span><span class="bytes">...</span><span class="mnemonic">s_contact_discord</span><span class="operand">DB "Discord Server", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://discord.gg/aWeFF8cfAn" target="_blank" class="comment">discord.gg/aWeFF8cfAn</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405000</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_contact_github]</span><span class="comment">; RDI = &s_contact_github</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405007</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_link</span><span class="comment">; Open GitHub profile</span>
-            </div>
-            <div class="code-line">
-              <span class="address">0040500c</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [s_contact_discord]</span><span class="comment">; RDI = &s_contact_discord</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405013</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_link</span><span class="comment">; Open Discord invite</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405024</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span>
-            </div>
-           `,
-          decompile: ``,
-        },
-        
-        chatroom: {
-          assembly: `
-            <div class="code-line">
-              <span class="address">00407000</span>
-              <span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span>
-              <span class="operand">RBP</span>
-              <span class="comment">; Establishing connection to chat server...</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407001</span>
-              <span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span>
-              <span class="operand">RBP,RSP</span>
-            </div>
-             <div class="code-line">
-              <span class="address">00407004</span>
-              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
-              <span class="operand">init_supabase_channel</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407009</span>
-              <span class="bytes">48 8d 3d</span><span class="mnemonic mnemonic-LEA">LEA</span>
-              <span class="operand">RDI,[s_realtime_channel]</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407010</span>
-              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
-              <span class="operand">subscribe_to_messages</span>
-               <span class="comment">; Listening for incoming messages</span>
-            </div>
-             <div class="code-line">
-              <span class="address">00407015</span>
-              <span class="bytes">eb fe</span><span class="mnemonic mnemonic-JMP">JMP</span>
-              <span class="operand">00407015</span>
-               <span class="comment">; Infinite loop to keep connection alive</span>
-            </div>
-          `,
-          decompile: ``,
-        },
-      };
+  <!-- Projects Popup -->
+  <div class="popup-overlay" id="popup-projects">
+    <div class="popup-window flicker">
+      <div class="scanline"></div>
+      <div class="crt-effect"></div>
+      <div class="popup-header">
+        <div>LOAD"PROJECTS.PRG",8,1</div>
+        <button class="close-btn" onclick="closePopup('projects')">X</button>
+      </div>
+      <div class="popup-content" id="projectsContent"></div>
+    </div>
+  </div>
 
-      // Function to switch content
-      function switchContent(section) {
-        const data = contentData[section];
-        if (data) {
-          const listingView = document.getElementById("listingView");
-          if (section === "chatroom") {
-            // For the chatroom, we inject the full HTML UI.
-            listingView.innerHTML = `
-              <div class="chatroom-container">
-                <div id="messages" class="messages"></div>
-                <div id="settingsDropdown" class="settings-dropdown" style="display: none">
-                  <label for="usernameInput">Change Username:</label>
-                  <input id="usernameInput" type="text" />
-                  <button id="saveUsernameBtn">Save</button>
-                </div>
-                <div class="composer-wrapper">
-                  <div class="composer">
-                    <input id="messageInput" type="text" placeholder="Type a message..." />
-                    <button id="settingsBtn" class="toolbar-btn" title="Settings">
-                    </button>
-                    <button id="sendBtn" class="toolbar-btn" title="Send">
-                      ➤
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `;
-          } else {
-            listingView.innerHTML = data.assembly;
-          }
+  <!-- Writeups Popup -->
+  <div class="popup-overlay" id="popup-writeups">
+    <div class="popup-window flicker">
+      <div class="scanline"></div>
+      <div class="crt-effect"></div>
+      <div class="popup-header">
+        <div>LOAD"WRITEUPS.PRG",8,1</div>
+        <button class="close-btn" onclick="closePopup('writeups')">X</button>
+      </div>
+      <div class="popup-content" id="writeupsContent"></div>
+    </div>
+  </div>
 
-          if (section === "writeups" && data.data) {
-            let assemblyContent = data.assembly;
-            let dataSectionContent = `
-              <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Data Section for Writeups ---</span></div>
-            `;
-            let callInstructions = "";
-            let currentAddress = 0x00403004;
+  <!-- Links Popup -->
+  <div class="popup-overlay" id="popup-links">
+    <div class="popup-window flicker">
+      <div class="scanline"></div>
+      <div class="crt-effect"></div>
+      <div class="popup-header">
+        <div>LOAD"LINKS.PRG",8,1</div>
+        <button class="close-btn" onclick="closePopup('links')">X</button>
+      </div>
+      <div class="popup-content" id="linksContent"></div>
+    </div>
+  </div>
 
-            data.data.forEach((writeup, index) => {
-              const varName = `s_writeup_${index}`;
-              callInstructions += `
-                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Load Writeup ${
-                  index + 1
-                }: ${writeup.title.substring(0, 20)}... ---</span></div>
-                <div class="code-line"><span class="address">${currentAddress
-                  .toString(16)
-                  .toUpperCase()
-                  .padStart(
-                    8,
-                    "0"
-                  )}</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [${varName}]</span><span class="comment">; RDI = &${varName}</span></div>
-              `;
-              currentAddress += 7;
-              callInstructions += `
-                <div class="code-line"><span class="address">${currentAddress
-                  .toString(16)
-                  .toUpperCase()
-                  .padStart(
-                    8,
-                    "0"
-                  )}</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span></div>
-              `;
-              currentAddress += 5;
+  <script>
+    const projects = [
+      {
+        title: '[01] CASM COMPILER',
+        desc: 'A COMPILER DESIGNED TO SEAMLESSLY BLEND THE POWER AND CONTROL OF ASSEMBLY WITH THE SIMPLICITY AND READABILITY OF C-LIKE HIGH-LEVEL CONSTRUCTS. CONTEMPORARY HIGH-LEVEL FRONT-END FOR NASM (WINDOWS X64 FOCUSED).',
+        url: 'https://github.com/504sarwarerror/casm'
+      },
+      {
+        title: '[02] RABIDS FRAMEWORK',
+        desc: 'ROVING AUTONOMOUS BARTMOSS INTERFACE DRONES - COMPREHENSIVE FRAMEWORK FOR BUILDING CUSTOM OFFENSIVE SECURITY PAYLOADS. POWERFUL YET INTUITIVE GRAPHICAL INTERFACE TO CHAIN TOGETHER VARIOUS MODULES.',
+        url: 'https://github.com/504sarwarerror/rabids'
+      },
+      {
+        title: '[03] SAVANT RAG SYSTEM',
+        desc: 'RETRIEVAL-AUGMENTED GENERATION SYSTEM FOR MALWARE CODE GENERATION, POWERED BY 50,000 MALWARE SAMPLES INCLUDING STEALERS, WORMS, KEYLOGGERS. DESIGNED FOR SECURITY RESEARCHERS AND RED-TEAMERS.',
+        url: 'https://github.com/504sarwarerror/SAVANT'
+      },
+      {
+        title: '[04] BLACKWALL DATABASE',
+        desc: 'CENTRALIZED RESOURCE FOR LOCATING VIRUS SAMPLES. INTENDED FOR IN-DEPTH ANALYSIS, RESEARCH, REVERSE ENGINEERING, OR EDUCATIONAL REVIEW. COMPREHENSIVE LIVING REPOSITORY.',
+        url: 'https://github.com/504sarwarerror/blackwall'
+      }
+    ];
 
-              dataSectionContent += `
-                <div class="code-line"><span class="address">${(
-                  0x00403100 +
-                  index * 0x80
-                )
-                  .toString(16)
-                  .toUpperCase()}</span><span class="bytes">...</span><span class="mnemonic">${varName}</span><span class="operand">DB "${
-                writeup.title
-              }", 0</span></div>
-                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; <a href="${
-                  writeup.url
-                }" target="_blank" class="comment">${
-                writeup.shortUrl
-              }</a></span></div>
-              `;
-            });
+    const writeups = [
+      {
+        title: '[01] ATM JACKPOTTING',
+        desc: 'SPITTING OUT BILLS - ATM JACKPOTTING SOUNDS LIKE SOMETHING OUT OF A MOVIE, BUT IT\'S A REAL ATTACK HAPPENING AROUND THE WORLD. SECRET CHEAT CODE FOR INFINITE MONEY MODE.',
+        url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/ATM-Jackpotting-Spitting-Out-Bills'
+      },
+      {
+        title: '[02] MALWARE INTERNALS',
+        desc: 'BASICS OF MALWARE INTERNAL STRUCTURE - IMAGINE YOUR COMPUTER HOLDING YOUR FILES HOSTAGE, LOCKED AWAY BEHIND AN UNBREAKABLE DIGITAL VAULT WITH A MENACING NOTE DEMANDING PAYMENT.',
+        url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/Basic\'s-of-Malware-Internal-Structure'
+      },
+      {
+        title: '[03] DISCORD C2 SERVER',
+        desc: 'C2 SERVERS ARE LIKE PUPPET MASTERS CONTROLLING ALL THE PUPPETS UNDER THEM. JUST AS A PUPPET MASTER PULLS THE STRINGS TO MAKE PUPPETS MOVE, A C2 SERVER SENDS INSTRUCTIONS.',
+        url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/Discord-C2-Server-and-a-Rat'
+      },
+      {
+        title: '[04] USERLAND ROOTKITS',
+        desc: 'THE GHOST IN THE MACHINE - YOUR COMPUTER SEEMS FINE BUT SOMETHING INVISIBLE IS HIDING DEEP INSIDE YOUR SYSTEM. WATCHING. WAITING. IT CAN SPY ON YOU, STEAL YOUR DATA.',
+        url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit\'s-and-the-Code-Behind-it'
+      }
+    ];
 
-            const exitInstructions = `
-              <div class="code-line"><span class="address">${currentAddress
-                .toString(16)
-                .toUpperCase()
-                .padStart(
-                  8,
-                  "0"
-                )}</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span></div>
-              <div class="code-line"><span class="address">${(
-                currentAddress + 1
-              )
-                .toString(16)
-                .toUpperCase()
-                .padStart(
-                  8,
-                  "0"
-                )}</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span></div>
-            `;
-            listingView.innerHTML = assemblyContent.replace(
-              "</div>", // This targets the closing div of the initial assembly prologue
-              `</div>${dataSectionContent}${callInstructions}${exitInstructions}` // Inserts data, then calls, then exit instructions
-            );
-          }
+    const links = [
+      { title: '> TWITTER/X', desc: '@SARWAROFFLINE', url: 'https://x.com/sarwaroffline' },
+      { title: '> GITHUB', desc: 'GITHUB.COM/504SARWARERROR', url: 'https://github.com/504sarwarerror' },
+      { title: '> DISCORD', desc: 'DISCORD.GG/CTRLALTDELETE', url: 'https://discord.gg/aWeFF8cfAn' },
+      { title: '> WIKI', desc: 'TECHNICAL WRITEUPS & RESEARCH', url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki' }
+    ];
 
-          if (section === "chatroom") {
-            initChatroom();
-          }
+    function typeWriter(element, text, speed = 30, callback) {
+      let i = 0;
+      element.innerHTML = '';
+
+      function type() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else if (callback) {
+          callback();
         }
       }
+      type();
+    }
 
-      // Function to switch mobile tabs
-      function switchMobileTab(tabId) {
-        // Don't run on desktop
-        if (window.innerWidth > 768) return;
-
-        // Update active tab button
-        const tabs = document.querySelectorAll("#mobileNav .mobile-tab");
-        tabs.forEach((tab) => {
-          tab.classList.remove("active");
-          if (tab.getAttribute("onclick").includes(tabId)) {
-            tab.classList.add("active");
-          }
-        });
-
-        // Update active panel content
-        const panels = document.querySelectorAll("#leftPanel .panel");
-        panels.forEach((panel) => {
-          panel.classList.remove("mobile-active");
-        });
-        document.getElementById(tabId).classList.add("mobile-active");
-      }
-
-      // Set initial mobile tab
-  switchMobileTab("symbolTreePanel");
-
-      // Chatroom Logic
-      function initChatroom() {
-        const SUPABASE_URL = "https://jfjozylvsbhsyiyfpacp.supabase.co";
-        const SUPABASE_ANON_KEY =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmam96eWx2c2Joc3lpeWZwYWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MzczMTAsImV4cCI6MjA3NDIxMzMxMH0.M9kZUvXvJbY4H1rNp9qK-avTrKBOLifRFmYQByzD0KI";
-        const supabaseClient = supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY
-        );
-
-        const messagesEl = document.getElementById("messages");
-        const sendBtn = document.getElementById("sendBtn");
-        const messageInput = document.getElementById("messageInput");
-        const settingsBtn = document.getElementById("settingsBtn");
-        const settingsDropdown = document.getElementById("settingsDropdown");
-        const usernameInput = document.getElementById("usernameInput");
-        const saveUsernameBtn = document.getElementById("saveUsernameBtn");
-
-        // Ensure elements exist before proceeding
-        if (!messagesEl || !sendBtn || !messageInput || !settingsBtn) {
-          console.error("Chatroom elements not found. Aborting init.");
-          return;
-        }
-
-        let mySessionId = localStorage.getItem("chat_session_id");
-        let lastMessageTime = 0;
-        let lastMessageContent = "";
-        const MESSAGE_COOLDOWN = 2000;
-        const MAX_MESSAGE_LENGTH = 500;
-        const MAX_USERNAME_LENGTH = 25;
-        const SPAM_WINDOW = 30000;
-        const MAX_MESSAGES_IN_WINDOW = 10;
-        let messageTimestamps = [];
-        let userTimeoutUntil = 0;
-        const SPAM_TIMEOUT_DURATION = 30000;
-        const allUserTimestamps = {};
-
-        if (!mySessionId) {
-          mySessionId = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem("chat_session_id", mySessionId);
-        }
-
-        function randomUsername() {
-          const adjectives = [
-            "Retro",
-            "Ghost",
-            "Cyber",
-            "Pixel",
-            "Neon",
-            "Shadow",
-            "Glitch",
-            "Toxic",
-            "Quantum",
-            "Mad",
-            "Broken",
-            "Void",
-            "Viral",
-            "Feral",
-            "Cha0s",
-            "Null",
-            "Error",
-            "Fractured",
-          ];
-          const nouns = [
-            "Tiger",
-            "Falcon",
-            "Ninja",
-            "Dragon",
-            "Panda",
-            "Freak",
-            "Virus",
-            "Anon",
-            "Corpse",
-            "Reaper",
-            "Dumpster",
-            "Ghoul",
-            "Hack",
-            "Phantom",
-            "Wraith",
-            "Blob",
-            "Overload",
-          ];
-          const symbols = [
-            "_",
-            "-",
-            "~",
-            "!",
-            "@",
-            "#",
-            "$",
-            "%",
-            "^",
-            "∆",
-            "?",
-          ];
-          const endings = ["404", "666", "XxX", "Ω", ".exe", "!!", "∞", "?!"];
-          const leetify = (word) =>
-            word.replace(
-              /[aAeEiIoOsStT]/g,
-              (c) =>
-                ({ a: "4", e: "3", i: "1", o: "0", s: "5", t: "7" }[
-                  c.toLowerCase()
-                ] || c)
-            );
-          const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-          const noun = nouns[Math.floor(Math.random() * nouns.length)];
-          const sym = symbols[Math.floor(Math.random() * symbols.length)];
-          const end = endings[Math.floor(Math.random() * endings.length)];
-          const number = Math.floor(Math.random() * 999);
-          const style = Math.random();
-          let name;
-          if (style < 0.25) name = leetify(adj) + sym + leetify(noun) + end;
-          else if (style < 0.5)
-            name = adj.toUpperCase() + sym + noun.toLowerCase() + number;
-          else if (style < 0.75)
-            name = adj.toLowerCase() + noun.toUpperCase() + sym + end;
-          else
-            name =
-              leetify(adj) +
-              leetify(noun) +
-              symbols[Math.floor(Math.random() * symbols.length)] +
-              number;
-          return name;
-        }
-
-        function generateGradientForUsername(username) {
-          let hash = 0;
-          for (let i = 0; i < username.length; i++)
-            hash = username.charCodeAt(i) + ((hash << 5) - hash);
-          const hue1 = Math.abs(hash % 360);
-          const hue2 = (hue1 + 72) % 360;
-          return `linear-gradient(90deg, hsl(${hue1}, 80%, 60%), hsl(${hue2}, 80%, 60%), hsl(${hue1}, 80%, 60%))`;
-        }
-
-        let myUsername =
-          localStorage.getItem("chat_username") || randomUsername();
-        localStorage.setItem("chat_username", myUsername);
-
-        const usernameGradients = {};
-        function getGradient(username) {
-          if (!usernameGradients[username])
-            usernameGradients[username] = generateGradientForUsername(username);
-          return usernameGradients[username];
-        }
-
-        function addMessage(item, mine = false) {
-          const outer = document.createElement("div");
-          outer.dataset.userId = item.user || mySessionId;
-          outer.dataset.content = item.content;
-          outer.className = "msg" + (mine ? " mine" : "");
-
-          const meta = document.createElement("div");
-          meta.className = "meta";
-          const usernameSpan = document.createElement("span");
-          usernameSpan.className = "username";
-          let username = item.username || "Anonymous";
-          if (username.length > MAX_USERNAME_LENGTH) {
-            username = username.substring(0, MAX_USERNAME_LENGTH) + "...";
-          }
-          usernameSpan.textContent = username;
-
-          meta.appendChild(usernameSpan);
-          meta.appendChild(
-            document.createTextNode(
-              " " + new Date(item.created_at || Date.now()).toLocaleTimeString()
-            )
-          );
-
-          const body = document.createElement("div");
-          const sanitizedContent = (item.content || "")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-          const finalContent = sanitizedContent.replace(
-            /&lt;img src="https:\/\/media\.giphy\.com\/media\/l0MYt5jPR6QX5pnqM\/giphy\.gif" \/&gt;/g,
-            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
-          );
-          body.innerHTML = finalContent;
-          outer.appendChild(meta);
-          outer.appendChild(body);
-          messagesEl.appendChild(outer);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
-
-        function showSkeletonLoader() {
-          messagesEl.innerHTML = "";
-          for (let i = 0; i < 15; i++) {
-            const skeleton = document.createElement("div");
-            skeleton.className = "skeleton-msg";
-            skeleton.innerHTML = `<div class="skeleton-line long"></div>`;
-            if (Math.random() > 0.5) {
-              skeleton.style.maxWidth = "70%";
-            }
-            messagesEl.appendChild(skeleton);
-          }
-        }
-
-        async function loadMessages() {
-          showSkeletonLoader();
-          try {
-            const { data, error } = await supabaseClient
-              .from("messages")
-              .select("*")
-              .order("created_at", { ascending: true });
-            messagesEl.innerHTML = "";
-            if (error) {
-              console.error("Error loading messages:", error);
-              messagesEl.innerHTML = `<div class="msg">Error loading messages.</div>`;
-              return;
-            }
-            data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
-          } catch (e) {
-            console.error("Network error during message loading:", e);
-            messagesEl.innerHTML = `<div class="msg">Network error. Could not load chat.</div>`;
-          }
-        }
-
-        async function sendMessage() {
-          if (userTimeoutUntil > Date.now()) {
-            const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
-            messageInput.placeholder = `Timeout for ${remaining}s...`;
-            return;
-          }
-          messageInput.placeholder = "Type a message...";
-
-          const now = Date.now();
-          if (now - lastMessageTime < MESSAGE_COOLDOWN) return;
-
-          messageTimestamps = messageTimestamps.filter(
-            (timestamp) => now - timestamp < SPAM_WINDOW
-          );
-
-          if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
-            userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
-            messageTimestamps = [];
-            return;
-          }
-
-          let text = messageInput.value.trim();
-          if (text && text === lastMessageContent) {
-            messageInput.placeholder = "Please don't send duplicate messages.";
-            return;
-          }
-
-          const chaoticText = text.replace(
-            /gif/i,
-            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
-          );
-          if (text.length > MAX_MESSAGE_LENGTH) {
-            text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
-          }
-
-          const messagePayload = {
-            user: mySessionId,
-            username: myUsername,
-            content: chaoticText,
-            created_at: new Date().toISOString(),
-          };
-
-          sendBtn.disabled = true;
-          messageInput.disabled = true;
-          messageInput.placeholder = "Sending...";
-
-          try {
-            const { error } = await supabaseClient
-              .from("messages")
-              .insert([messagePayload]);
-            if (error) {
-              console.error("Error sending message:", error);
-              messageInput.placeholder = "Failed to send. Try again.";
-              return;
-            }
-            // Don't call addMessage here, let the subscription handle it to avoid duplicates
-            messageInput.value = "";
-            lastMessageTime = now;
-            lastMessageContent = text;
-            messageTimestamps.push(now);
-          } catch (e) {
-            console.error("Network error during message insertion:", e);
-            messageInput.placeholder =
-              "Network error. Please check connection.";
-          } finally {
-            sendBtn.disabled = false;
-            messageInput.disabled = false;
-            if (document.activeElement !== messageInput) {
-              messageInput.focus();
-            }
-            if (messageInput.placeholder.includes("...")) {
-              messageInput.placeholder = "Type a message...";
-            }
-          }
-        }
-
-        sendBtn.addEventListener("click", sendMessage);
-        messageInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") sendMessage();
-        });
-
-        settingsBtn.addEventListener("click", () => {
-          const isHidden = settingsDropdown.style.display === "none";
-          settingsDropdown.style.display = isHidden ? "flex" : "none";
-          if (isHidden) {
-            usernameInput.value = myUsername;
-            usernameInput.focus();
-          }
-        });
-
-        saveUsernameBtn.addEventListener("click", () => {
-          const newUsername = usernameInput.value.trim();
-          if (newUsername) {
-            myUsername = newUsername;
-            localStorage.setItem("chat_username", myUsername);
-            settingsDropdown.style.display = "none";
-          }
-        });
-
-        const channel = supabaseClient
-          .channel("chat-room", { config: { presence: { key: mySessionId } } })
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "messages" },
-            (payload) => {
-              const newUserMessage = payload.new;
-              const now = Date.now();
-              const userId = newUserMessage.user;
-
-              // This prevents your own successfully sent messages from appearing a second time.
-              if (
-                newUserMessage.user === mySessionId &&
-                newUserMessage.content.includes(lastMessageContent)
-              ) {
-                // Find the local message and remove it, as we'll add the one from DB
-                const localMsg = document.querySelector(
-                  `.msg[data-user="${mySessionId}"][data-content="${newUserMessage.content}"]`
-                );
-                if (localMsg) localMsg.remove();
-              }
-
-              if (!allUserTimestamps[userId]) {
-                allUserTimestamps[userId] = [];
-              }
-
-              allUserTimestamps[userId] = allUserTimestamps[userId].filter(
-                (timestamp) => now - timestamp < SPAM_WINDOW
-              );
-
-              if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
-                console.warn(`Hiding spam message from user: ${userId}`);
-                return;
-              }
-
-              allUserTimestamps[userId].push(now);
-              addMessage(newUserMessage, newUserMessage.user === mySessionId);
-            }
-          )
-          .subscribe((status) => {
-            if (status === "SUBSCRIBED") {
-              console.log("Connected to chat channel!");
-              loadMessages();
-            }
-          });
-
-        // Return a cleanup function to unsubscribe when the tab is changed
-        return () => {
-          console.log("Unsubscribing from chat channel.");
-          supabaseClient.removeChannel(channel);
-        };
-      }
-
-      // Initialize with about content
-      switchContent("about");
-
-      let isResizing = false;
-      let currentSplitter = null;
-
-      function initResizable() {
-        const splitter1 = document.getElementById("splitter1");
-        const splitter2 = document.getElementById("splitter2");
-        const leftPanel = document.getElementById("leftPanel");
-        const centerPanel = document.getElementById("centerPanel");
-        const rightPanel = document.getElementById("rightPanel");
-
-        if (window.innerWidth <= 768) {
-          // Disable resizing on mobile
-          return;
-        }
-
-        splitter1.addEventListener("mousedown", (e) => {
-          isResizing = true;
-          currentSplitter = "splitter1";
-          document.body.style.cursor = "col-resize";
-        });
-
-        splitter2.addEventListener("mousedown", (e) => {
-          isResizing = true;
-          currentSplitter = "right";
-          document.body.style.cursor = "col-resize";
-        });
-
-        document.addEventListener("mousemove", (e) => {
-          if (!isResizing) return;
-
-          if (currentSplitter === "splitter1") {
-            const newWidth = e.clientX;
-            if (newWidth > 200 && newWidth < 500) {
-              leftPanel.style.width = newWidth + "px";
-            }
-          }
-        });
-
-        document.addEventListener("mouseup", () => {
-          isResizing = false;
-          currentSplitter = null;
-          document.body.style.cursor = "default";
-        });
-      }
-
-      // Initialize resizable panels
-      initResizable();
-
-      // Reinitialize on window resize
-      window.addEventListener("resize", () => {
-        location.reload(); // Simple way to handle layout change, can be improved
+    function addLine(parent, text, delay = 0) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const line = document.createElement('div');
+          line.className = 'terminal-line';
+          line.textContent = text;
+          parent.appendChild(line);
+          resolve();
+        }, delay);
       });
-    </script>
-  </body>
-</html>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; --- Data Section for Contact Links ---</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405100</span><span class="bytes">...</span><span class="mnemonic">s_contact_github</span><span class="operand">DB "GitHub Profile", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://github.com/504sarwarerror" target="_blank" class="comment">github.com/504sarwarerror</a></span>
-            </div>
-            <div class="code-line">
-              <span class="address">00405180</span><span class="bytes">...</span><span class="mnemonic">s_contact_discord</span><span class="operand">DB "Discord Server", 0</span>
-            </div>
-            <div class="code-line">
-              <span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span>
-              <span class="comment">; <a href="https://discord.gg/aWeFF8cfAn" target="_blank" class="comment">discord.gg/aWeFF8cfAn</a></span>
-            </div>
-           `,
-          decompile: ``,
-        },
-        
-        chatroom: {
-          assembly: `
-            <div class="code-line">
-              <span class="address">00407000</span>
-              <span class="bytes">55</span><span class="mnemonic mnemonic-PUSH">PUSH</span>
-              <span class="operand">RBP</span>
-              <span class="comment">; Establishing connection to chat server...</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407001</span>
-              <span class="bytes">48 89 e5</span><span class="mnemonic mnemonic-MOV">MOV</span>
-              <span class="operand">RBP,RSP</span>
-            </div>
-             <div class="code-line">
-              <span class="address">00407004</span>
-              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
-              <span class="operand">init_supabase_channel</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407009</span>
-              <span class="bytes">48 8d 3d</span><span class="mnemonic mnemonic-LEA">LEA</span>
-              <span class="operand">RDI,[s_realtime_channel]</span>
-            </div>
-            <div class="code-line">
-              <span class="address">00407010</span>
-              <span class="bytes">e8</span><span class="mnemonic mnemonic-CALL">CALL</span>
-              <span class="operand">subscribe_to_messages</span>
-               <span class="comment">; Listening for incoming messages</span>
-            </div>
-             <div class="code-line">
-              <span class="address">00407015</span>
-              <span class="bytes">eb fe</span><span class="mnemonic mnemonic-JMP">JMP</span>
-              <span class="operand">00407015</span>
-               <span class="comment">; Infinite loop to keep connection alive</span>
-            </div>
-          `,
-          decompile: ``,
-        },
-      };
+    }
 
-      // Function to switch content
-      function switchContent(section) {
-        const data = contentData[section];
-        if (data) {
-          const listingView = document.getElementById("listingView");
-          if (section === "chatroom") {
-            // For the chatroom, we inject the full HTML UI.
-            listingView.innerHTML = `
-              <div class="chatroom-container">
-                <div id="messages" class="messages"></div>
-                <div id="settingsDropdown" class="settings-dropdown" style="display: none">
-                  <label for="usernameInput">Change Username:</label>
-                  <input id="usernameInput" type="text" />
-                  <button id="saveUsernameBtn">Save</button>
-                </div>
-                <div class="composer-wrapper">
-                  <div class="composer">
-                    <input id="messageInput" type="text" placeholder="Type a message..." />
-                    <button id="settingsBtn" class="toolbar-btn" title="Settings">
-                    </button>
-                    <button id="sendBtn" class="toolbar-btn" title="Send">
-                      ➤
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `;
-          } else {
-            listingView.innerHTML = data.assembly;
+    async function bootSequence() {
+      const container = document.getElementById('bootSequence');
+
+      await addLine(container, '    **** COMMODORE 64 BASIC V2 ****', 100);
+      await addLine(container, '', 50);
+      await addLine(container, ' 64K RAM SYSTEM 38911 BASIC BYTES FREE', 100);
+      await addLine(container, '', 100);
+      await addLine(container, 'READY.', 200);
+      await addLine(container, 'LOAD"BARTMOSS.SYS",8', 300);
+      await addLine(container, '', 100);
+      await addLine(container, 'SEARCHING FOR BARTMOSS.SYS', 200);
+
+      const loadingLine = document.createElement('div');
+      loadingLine.className = 'terminal-line';
+      container.appendChild(loadingLine);
+
+      await new Promise(resolve => {
+        let dots = '';
+        let count = 0;
+        const interval = setInterval(() => {
+          dots += '.';
+          loadingLine.textContent = 'LOADING' + dots;
+          count++;
+          if (count >= 20) {
+            clearInterval(interval);
+            resolve();
           }
-
-          if (section === "writeups" && data.data) {
-            let assemblyContent = data.assembly;
-            let dataSectionContent = `
-              <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Data Section for Writeups ---</span></div>
-            `;
-            let callInstructions = "";
-            let currentAddress = 0x00403004;
-
-            data.data.forEach((writeup, index) => {
-              const varName = `s_writeup_${index}`;
-              callInstructions += `
-                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; --- Load Writeup ${
-                  index + 1
-                }: ${writeup.title.substring(0, 20)}... ---</span></div>
-                <div class="code-line"><span class="address">${currentAddress
-                  .toString(16)
-                  .toUpperCase()
-                  .padStart(
-                    8,
-                    "0"
-                  )}</span><span class="bytes">48 8d 3d ..</span><span class="mnemonic mnemonic-LEA">LEA</span><span class="operand">RDI, [${varName}]</span><span class="comment">; RDI = &${varName}</span></div>
-              `;
-              currentAddress += 7;
-              callInstructions += `
-                <div class="code-line"><span class="address">${currentAddress
-                  .toString(16)
-                  .toUpperCase()
-                  .padStart(
-                    8,
-                    "0"
-                  )}</span><span class="bytes">e8 .. .. ..</span><span class="mnemonic mnemonic-CALL">CALL</span><span class="operand">open_document</span></div>
-              `;
-              currentAddress += 5;
-
-              dataSectionContent += `
-                <div class="code-line"><span class="address">${(
-                  0x00403100 +
-                  index * 0x80
-                )
-                  .toString(16)
-                  .toUpperCase()}</span><span class="bytes">...</span><span class="mnemonic">${varName}</span><span class="operand">DB "${
-                writeup.title
-              }", 0</span></div>
-                <div class="code-line"><span class="address"></span><span class="bytes"></span><span class="mnemonic"></span><span class="operand"></span><span class="comment">; <a href="${
-                  writeup.url
-                }" target="_blank" class="comment">${
-                writeup.shortUrl
-              }</a></span></div>
-              `;
-            });
-
-            const exitInstructions = `
-              <div class="code-line"><span class="address">${currentAddress
-                .toString(16)
-                .toUpperCase()
-                .padStart(
-                  8,
-                  "0"
-                )}</span><span class="bytes">5d</span><span class="mnemonic mnemonic-POP">POP</span><span class="operand">RBP</span><span class="comment">; Restore stack</span></div>
-              <div class="code-line"><span class="address">${(
-                currentAddress + 1
-              )
-                .toString(16)
-                .toUpperCase()
-                .padStart(
-                  8,
-                  "0"
-                )}</span><span class="bytes">c3</span><span class="mnemonic mnemonic-RET">RET</span></div>
-            `;
-            listingView.innerHTML = assemblyContent.replace(
-              "</div>", // This targets the closing div of the initial assembly prologue
-              `</div>${dataSectionContent}${callInstructions}${exitInstructions}` // Inserts data, then calls, then exit instructions
-            );
-          }
-
-          if (section === "chatroom") {
-            initChatroom();
-          }
-        }
-      }
-
-      // Function to switch mobile tabs
-      function switchMobileTab(tabId) {
-        // Don't run on desktop
-        if (window.innerWidth > 768) return;
-
-        // Update active tab button
-        const tabs = document.querySelectorAll("#mobileNav .mobile-tab");
-        tabs.forEach((tab) => {
-          tab.classList.remove("active");
-          if (tab.getAttribute("onclick").includes(tabId)) {
-            tab.classList.add("active");
-          }
-        });
-
-        // Update active panel content
-        const panels = document.querySelectorAll("#leftPanel .panel");
-        panels.forEach((panel) => {
-          panel.classList.remove("mobile-active");
-        });
-        document.getElementById(tabId).classList.add("mobile-active");
-      }
-
-      // Set initial mobile tab
-  switchMobileTab("symbolTreePanel");
-
-      // Chatroom Logic
-      function initChatroom() {
-        const SUPABASE_URL = "https://jfjozylvsbhsyiyfpacp.supabase.co";
-        const SUPABASE_ANON_KEY =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmam96eWx2c2Joc3lpeWZwYWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MzczMTAsImV4cCI6MjA3NDIxMzMxMH0.M9kZUvXvJbY4H1rNp9qK-avTrKBOLifRFmYQByzD0KI";
-        const supabaseClient = supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY
-        );
-
-        const messagesEl = document.getElementById("messages");
-        const sendBtn = document.getElementById("sendBtn");
-        const messageInput = document.getElementById("messageInput");
-        const settingsBtn = document.getElementById("settingsBtn");
-        const settingsDropdown = document.getElementById("settingsDropdown");
-        const usernameInput = document.getElementById("usernameInput");
-        const saveUsernameBtn = document.getElementById("saveUsernameBtn");
-
-        // Ensure elements exist before proceeding
-        if (!messagesEl || !sendBtn || !messageInput || !settingsBtn) {
-          console.error("Chatroom elements not found. Aborting init.");
-          return;
-        }
-
-        let mySessionId = localStorage.getItem("chat_session_id");
-        let lastMessageTime = 0;
-        let lastMessageContent = "";
-        const MESSAGE_COOLDOWN = 2000;
-        const MAX_MESSAGE_LENGTH = 500;
-        const MAX_USERNAME_LENGTH = 25;
-        const SPAM_WINDOW = 30000;
-        const MAX_MESSAGES_IN_WINDOW = 10;
-        let messageTimestamps = [];
-        let userTimeoutUntil = 0;
-        const SPAM_TIMEOUT_DURATION = 30000;
-        const allUserTimestamps = {};
-
-        if (!mySessionId) {
-          mySessionId = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem("chat_session_id", mySessionId);
-        }
-
-        function randomUsername() {
-          const adjectives = [
-            "Retro",
-            "Ghost",
-            "Cyber",
-            "Pixel",
-            "Neon",
-            "Shadow",
-            "Glitch",
-            "Toxic",
-            "Quantum",
-            "Mad",
-            "Broken",
-            "Void",
-            "Viral",
-            "Feral",
-            "Cha0s",
-            "Null",
-            "Error",
-            "Fractured",
-          ];
-          const nouns = [
-            "Tiger",
-            "Falcon",
-            "Ninja",
-            "Dragon",
-            "Panda",
-            "Freak",
-            "Virus",
-            "Anon",
-            "Corpse",
-            "Reaper",
-            "Dumpster",
-            "Ghoul",
-            "Hack",
-            "Phantom",
-            "Wraith",
-            "Blob",
-            "Overload",
-          ];
-          const symbols = [
-            "_",
-            "-",
-            "~",
-            "!",
-            "@",
-            "#",
-            "$",
-            "%",
-            "^",
-            "∆",
-            "?",
-          ];
-          const endings = ["404", "666", "XxX", "Ω", ".exe", "!!", "∞", "?!"];
-          const leetify = (word) =>
-            word.replace(
-              /[aAeEiIoOsStT]/g,
-              (c) =>
-                ({ a: "4", e: "3", i: "1", o: "0", s: "5", t: "7" }[
-                  c.toLowerCase()
-                ] || c)
-            );
-          const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-          const noun = nouns[Math.floor(Math.random() * nouns.length)];
-          const sym = symbols[Math.floor(Math.random() * symbols.length)];
-          const end = endings[Math.floor(Math.random() * endings.length)];
-          const number = Math.floor(Math.random() * 999);
-          const style = Math.random();
-          let name;
-          if (style < 0.25) name = leetify(adj) + sym + leetify(noun) + end;
-          else if (style < 0.5)
-            name = adj.toUpperCase() + sym + noun.toLowerCase() + number;
-          else if (style < 0.75)
-            name = adj.toLowerCase() + noun.toUpperCase() + sym + end;
-          else
-            name =
-              leetify(adj) +
-              leetify(noun) +
-              symbols[Math.floor(Math.random() * symbols.length)] +
-              number;
-          return name;
-        }
-
-        function generateGradientForUsername(username) {
-          let hash = 0;
-          for (let i = 0; i < username.length; i++)
-            hash = username.charCodeAt(i) + ((hash << 5) - hash);
-          const hue1 = Math.abs(hash % 360);
-          const hue2 = (hue1 + 72) % 360;
-          return `linear-gradient(90deg, hsl(${hue1}, 80%, 60%), hsl(${hue2}, 80%, 60%), hsl(${hue1}, 80%, 60%))`;
-        }
-
-        let myUsername =
-          localStorage.getItem("chat_username") || randomUsername();
-        localStorage.setItem("chat_username", myUsername);
-
-        const usernameGradients = {};
-        function getGradient(username) {
-          if (!usernameGradients[username])
-            usernameGradients[username] = generateGradientForUsername(username);
-          return usernameGradients[username];
-        }
-
-        function addMessage(item, mine = false) {
-          const outer = document.createElement("div");
-          outer.dataset.userId = item.user || mySessionId;
-          outer.dataset.content = item.content;
-          outer.className = "msg" + (mine ? " mine" : "");
-
-          const meta = document.createElement("div");
-          meta.className = "meta";
-          const usernameSpan = document.createElement("span");
-          usernameSpan.className = "username";
-          let username = item.username || "Anonymous";
-          if (username.length > MAX_USERNAME_LENGTH) {
-            username = username.substring(0, MAX_USERNAME_LENGTH) + "...";
-          }
-          usernameSpan.textContent = username;
-
-          meta.appendChild(usernameSpan);
-          meta.appendChild(
-            document.createTextNode(
-              " " + new Date(item.created_at || Date.now()).toLocaleTimeString()
-            )
-          );
-
-          const body = document.createElement("div");
-          const sanitizedContent = (item.content || "")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-          const finalContent = sanitizedContent.replace(
-            /&lt;img src="https:\/\/media\.giphy\.com\/media\/l0MYt5jPR6QX5pnqM\/giphy\.gif" \/&gt;/g,
-            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
-          );
-          body.innerHTML = finalContent;
-          outer.appendChild(meta);
-          outer.appendChild(body);
-          messagesEl.appendChild(outer);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-        }
-
-        function showSkeletonLoader() {
-          messagesEl.innerHTML = "";
-          for (let i = 0; i < 15; i++) {
-            const skeleton = document.createElement("div");
-            skeleton.className = "skeleton-msg";
-            skeleton.innerHTML = `<div class="skeleton-line long"></div>`;
-            if (Math.random() > 0.5) {
-              skeleton.style.maxWidth = "70%";
-            }
-            messagesEl.appendChild(skeleton);
-          }
-        }
-
-        async function loadMessages() {
-          showSkeletonLoader();
-          try {
-            const { data, error } = await supabaseClient
-              .from("messages")
-              .select("*")
-              .order("created_at", { ascending: true });
-            messagesEl.innerHTML = "";
-            if (error) {
-              console.error("Error loading messages:", error);
-              messagesEl.innerHTML = `<div class="msg">Error loading messages.</div>`;
-              return;
-            }
-            data?.forEach((msg) => addMessage(msg, msg.user === mySessionId));
-          } catch (e) {
-            console.error("Network error during message loading:", e);
-            messagesEl.innerHTML = `<div class="msg">Network error. Could not load chat.</div>`;
-          }
-        }
-
-        async function sendMessage() {
-          if (userTimeoutUntil > Date.now()) {
-            const remaining = Math.ceil((userTimeoutUntil - Date.now()) / 1000);
-            messageInput.placeholder = `Timeout for ${remaining}s...`;
-            return;
-          }
-          messageInput.placeholder = "Type a message...";
-
-          const now = Date.now();
-          if (now - lastMessageTime < MESSAGE_COOLDOWN) return;
-
-          messageTimestamps = messageTimestamps.filter(
-            (timestamp) => now - timestamp < SPAM_WINDOW
-          );
-
-          if (messageTimestamps.length >= MAX_MESSAGES_IN_WINDOW) {
-            userTimeoutUntil = now + SPAM_TIMEOUT_DURATION;
-            messageTimestamps = [];
-            return;
-          }
-
-          let text = messageInput.value.trim();
-          if (text && text === lastMessageContent) {
-            messageInput.placeholder = "Please don't send duplicate messages.";
-            return;
-          }
-
-          const chaoticText = text.replace(
-            /gif/i,
-            '<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" />'
-          );
-          if (text.length > MAX_MESSAGE_LENGTH) {
-            text = text.substring(0, MAX_MESSAGE_LENGTH) + "... (truncated)";
-          }
-
-          const messagePayload = {
-            user: mySessionId,
-            username: myUsername,
-            content: chaoticText,
-            created_at: new Date().toISOString(),
-          };
-
-          sendBtn.disabled = true;
-          messageInput.disabled = true;
-          messageInput.placeholder = "Sending...";
-
-          try {
-            const { error } = await supabaseClient
-              .from("messages")
-              .insert([messagePayload]);
-            if (error) {
-              console.error("Error sending message:", error);
-              messageInput.placeholder = "Failed to send. Try again.";
-              return;
-            }
-            // Don't call addMessage here, let the subscription handle it to avoid duplicates
-            messageInput.value = "";
-            lastMessageTime = now;
-            lastMessageContent = text;
-            messageTimestamps.push(now);
-          } catch (e) {
-            console.error("Network error during message insertion:", e);
-            messageInput.placeholder =
-              "Network error. Please check connection.";
-          } finally {
-            sendBtn.disabled = false;
-            messageInput.disabled = false;
-            if (document.activeElement !== messageInput) {
-              messageInput.focus();
-            }
-            if (messageInput.placeholder.includes("...")) {
-              messageInput.placeholder = "Type a message...";
-            }
-          }
-        }
-
-        sendBtn.addEventListener("click", sendMessage);
-        messageInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") sendMessage();
-        });
-
-        settingsBtn.addEventListener("click", () => {
-          const isHidden = settingsDropdown.style.display === "none";
-          settingsDropdown.style.display = isHidden ? "flex" : "none";
-          if (isHidden) {
-            usernameInput.value = myUsername;
-            usernameInput.focus();
-          }
-        });
-
-        saveUsernameBtn.addEventListener("click", () => {
-          const newUsername = usernameInput.value.trim();
-          if (newUsername) {
-            myUsername = newUsername;
-            localStorage.setItem("chat_username", myUsername);
-            settingsDropdown.style.display = "none";
-          }
-        });
-
-        const channel = supabaseClient
-          .channel("chat-room", { config: { presence: { key: mySessionId } } })
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "messages" },
-            (payload) => {
-              const newUserMessage = payload.new;
-              const now = Date.now();
-              const userId = newUserMessage.user;
-
-              // This prevents your own successfully sent messages from appearing a second time.
-              if (
-                newUserMessage.user === mySessionId &&
-                newUserMessage.content.includes(lastMessageContent)
-              ) {
-                // Find the local message and remove it, as we'll add the one from DB
-                const localMsg = document.querySelector(
-                  `.msg[data-user="${mySessionId}"][data-content="${newUserMessage.content}"]`
-                );
-                if (localMsg) localMsg.remove();
-              }
-
-              if (!allUserTimestamps[userId]) {
-                allUserTimestamps[userId] = [];
-              }
-
-              allUserTimestamps[userId] = allUserTimestamps[userId].filter(
-                (timestamp) => now - timestamp < SPAM_WINDOW
-              );
-
-              if (allUserTimestamps[userId].length >= MAX_MESSAGES_IN_WINDOW) {
-                console.warn(`Hiding spam message from user: ${userId}`);
-                return;
-              }
-
-              allUserTimestamps[userId].push(now);
-              addMessage(newUserMessage, newUserMessage.user === mySessionId);
-            }
-          )
-          .subscribe((status) => {
-            if (status === "SUBSCRIBED") {
-              console.log("Connected to chat channel!");
-              loadMessages();
-            }
-          });
-
-        // Return a cleanup function to unsubscribe when the tab is changed
-        return () => {
-          console.log("Unsubscribing from chat channel.");
-          supabaseClient.removeChannel(channel);
-        };
-      }
-
-      // Initialize with about content
-      switchContent("about");
-
-      let isResizing = false;
-      let currentSplitter = null;
-
-      function initResizable() {
-        const splitter1 = document.getElementById("splitter1");
-        const splitter2 = document.getElementById("splitter2");
-        const leftPanel = document.getElementById("leftPanel");
-        const centerPanel = document.getElementById("centerPanel");
-        const rightPanel = document.getElementById("rightPanel");
-
-        if (window.innerWidth <= 768) {
-          // Disable resizing on mobile
-          return;
-        }
-
-        splitter1.addEventListener("mousedown", (e) => {
-          isResizing = true;
-          currentSplitter = "splitter1";
-          document.body.style.cursor = "col-resize";
-        });
-
-        splitter2.addEventListener("mousedown", (e) => {
-          isResizing = true;
-          currentSplitter = "right";
-          document.body.style.cursor = "col-resize";
-        });
-
-        document.addEventListener("mousemove", (e) => {
-          if (!isResizing) return;
-
-          if (currentSplitter === "splitter1") {
-            const newWidth = e.clientX;
-            if (newWidth > 200 && newWidth < 500) {
-              leftPanel.style.width = newWidth + "px";
-            }
-          }
-        });
-
-        document.addEventListener("mouseup", () => {
-          isResizing = false;
-          currentSplitter = null;
-          document.body.style.cursor = "default";
-        });
-      }
-
-      // Initialize resizable panels
-      initResizable();
-
-      // Reinitialize on window resize
-      window.addEventListener("resize", () => {
-        location.reload(); // Simple way to handle layout change, can be improved
+        }, 80);
       });
-    </script>
-  </body>
+
+      await addLine(container, 'READY.', 200);
+      await addLine(container, 'RUN', 300);
+      await addLine(container, '', 100);
+      await addLine(container, '================================', 100);
+      await addLine(container, 'SARWAR "BARTMOSS" TERMINAL', 100);
+      await addLine(container, '================================', 100);
+      await addLine(container, '', 100);
+      await addLine(container, '0 "SYSTEM     " 00 2A', 200);
+      await addLine(container, '', 100);
+
+      const menu = document.createElement('div');
+      menu.innerHTML = `
+        <div class="terminal-line menu-item" onclick="loadProgram('about')">10 "ABOUT.PRG" PRG</div>
+        <div class="terminal-line menu-item" onclick="loadProgram('projects')">20 "PROJECTS.PRG" PRG</div>
+        <div class="terminal-line menu-item" onclick="loadProgram('writeups')">30 "WRITEUPS.PRG" PRG</div>
+        <div class="terminal-line menu-item" onclick="loadProgram('links')">40 "LINKS.PRG" PRG</div>
+      `;
+      container.appendChild(menu);
+
+      await addLine(container, '', 100);
+      await addLine(container, '504 BLOCKS FREE.', 200);
+      await addLine(container, '', 100);
+      await addLine(container, 'READY.', 200);
+
+      const cursor = document.createElement('div');
+      cursor.className = 'terminal-line';
+      cursor.innerHTML = '<span class="cursor"></span>';
+      container.appendChild(cursor);
+    }
+
+    async function loadAbout() {
+      const content = document.getElementById('aboutContent');
+      content.innerHTML = '';
+
+      await addLine(content, 'SEARCHING FOR ABOUT.PRG', 100);
+      const loadLine = document.createElement('div');
+      loadLine.className = 'terminal-line';
+      content.appendChild(loadLine);
+
+      await new Promise(resolve => {
+        let dots = '';
+        let count = 0;
+        const interval = setInterval(() => {
+          dots += '.';
+          loadLine.textContent = 'LOADING' + dots;
+          count++;
+          if (count >= 15) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 60);
+      });
+
+      await addLine(content, 'READY.', 100);
+      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+      await addLine(content, '================================', 50);
+      await addLine(content, 'SARWAR "BARTMOSS"', 50);
+      await addLine(content, '================================', 50);
+      await addLine(content, '', 50);
+      await addLine(content, 'SPECIALIZING IN:', 50);
+      await addLine(content, '- ASSEMBLY PROGRAMMING', 50);
+      await addLine(content, '- MALWARE DEVELOPMENT', 50);
+      await addLine(content, '- OFFENSIVE SECURITY', 50);
+      await addLine(content, '- REVERSE ENGINEERING', 50);
+      await addLine(content, '', 100);
+      await addLine(content, 'LANGUAGES: X64 ASM, C, PYTHON', 50);
+      await addLine(content, 'PLATFORMS: WINDOWS, LINUX', 50);
+      await addLine(content, '', 100);
+
+      const techBox = document.createElement('div');
+      techBox.style.cssText = 'border: 1px solid #7C71DA; padding: 15px; margin: 20px 0; background: transparent;';
+      techBox.innerHTML = `
+        <div class="terminal-line">TOOLS:</div>
+        <div class="terminal-line"></div>
+        <div class="terminal-line">ARCHITECTURE: X86-64</div>
+        <div class="terminal-line">TOOLCHAIN: NASM</div>
+        <div class="terminal-line">DEBUGGERS: X64DBG, GDB</div>
+        <div class="terminal-line">DISASSEMBLERS: IDA</div>
+        `
+      content.appendChild(techBox);
+
+      await addLine(content, '', 100);
+      await addLine(content, 'READY.', 100);
+    }
+
+    async function loadProjects() {
+      const content = document.getElementById('projectsContent');
+      content.innerHTML = '';
+
+      await addLine(content, 'SEARCHING FOR PROJECTS.PRG', 100);
+      const loadLine = document.createElement('div');
+      loadLine.className = 'terminal-line';
+      content.appendChild(loadLine);
+
+      await new Promise(resolve => {
+        let dots = '';
+        let count = 0;
+        const interval = setInterval(() => {
+          dots += '.';
+          loadLine.textContent = 'LOADING' + dots;
+          count++;
+          if (count >= 15) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 60);
+      });
+
+      await addLine(content, 'READY.', 100);
+      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+
+      for (const project of projects) {
+        const box = document.createElement('div');
+        box.className = 'item-box';
+        box.onclick = () => window.open(project.url, '_blank');
+        box.innerHTML = `
+          <div class="item-title">${project.title}</div>
+          <div class="item-desc">${project.desc}</div>
+        `;
+        content.appendChild(box);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      await addLine(content, '', 100);
+      await addLine(content, 'READY.', 100);
+    }
+
+    async function loadWriteups() {
+      const content = document.getElementById('writeupsContent');
+      content.innerHTML = '';
+
+      await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
+      const loadLine = document.createElement('div');
+      loadLine.className = 'terminal-line';
+      content.appendChild(loadLine);
+
+      await new Promise(resolve => {
+        let dots = '';
+        let count = 0;
+        const interval = setInterval(() => {
+          dots += '.';
+          loadLine.textContent = 'LOADING' + dots;
+          count++;
+          if (count >= 15) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 60);
+      });
+
+      await addLine(content, 'READY.', 100);
+      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+
+      for (const writeup of writeups) {
+        const box = document.createElement('div');
+        box.className = 'item-box';
+        box.onclick = () => window.open(writeup.url, '_blank');
+        box.innerHTML = `
+          <div class="item-title">${writeup.title}</div>
+          <div class="item-desc">${writeup.desc}</div>
+        `;
+        content.appendChild(box);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      await addLine(content, '', 100);
+      await addLine(content, 'READY.', 100);
+    }
+
+    async function loadLinks() {
+      const content = document.getElementById('linksContent');
+      content.innerHTML = '';
+
+      await addLine(content, 'SEARCHING FOR LINKS.PRG', 100);
+      const loadLine = document.createElement('div');
+      loadLine.className = 'terminal-line';
+      content.appendChild(loadLine);
+
+      await new Promise(resolve => {
+        let dots = '';
+        let count = 0;
+        const interval = setInterval(() => {
+          dots += '.';
+          loadLine.textContent = 'LOADING' + dots;
+          count++;
+          if (count >= 15) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 60);
+      });
+
+      await addLine(content, 'READY.', 100);
+      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+      await addLine(content, 'EXTERNAL RESOURCES:', 100);
+      await addLine(content, '', 50);
+
+      for (const link of links) {
+        const box = document.createElement('div');
+        box.className = 'link-box';
+        box.onclick = () => window.open(link.url, '_blank');
+        box.innerHTML = `
+          ${link.title}
+          <div class="item-desc" style="margin-top: 5px;">${link.desc}</div>
+        `;
+        content.appendChild(box);
+        await new Promise(resolve => setTimeout(resolve, 80));
+      }
+
+      await addLine(content, '', 100);
+      await addLine(content, 'READY.', 100);
+    }
+
+    function loadProgram(type) {
+      const popup = document.getElementById('popup-' + type);
+      popup.classList.add('active');
+
+      if (type === 'about') loadAbout();
+      else if (type === 'projects') loadProjects();
+      else if (type === 'writeups') loadWriteups();
+      else if (type === 'links') loadLinks();
+    }
+
+    function closePopup(type) {
+      document.getElementById('popup-' + type).classList.remove('active');
+    }
+
+    document.querySelectorAll('.popup-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function (e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.popup-overlay').forEach(overlay => {
+          overlay.classList.remove('active');
+        });
+      }
+    });
+
+    window.addEventListener('load', bootSequence);
+  </script>
+</body>
+
 </html>
