@@ -195,7 +195,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: #000;
+      background: transparent; /* avoid full black covering */
       z-index: 2000;
       align-items: center;
       justify-content: center;
@@ -204,18 +204,22 @@
     .popup-overlay.active {
       display: flex;
       animation: fadeIn 0.2s;
+      background: rgba(0,0,0,0.28); /* lighter backdrop */
     }
 
     .popup-window {
       background: #3939C4;
-      width: 100%;
-      height: 100%;
+      width: 92%;
+      max-width: 1100px;
+      height: 84%;
+      max-height: 820px;
       overflow-y: auto;
-      padding: 40px 60px;
+      padding: 24px 36px;
       color: #7C71DA;
       font-size: 13px;
       position: relative;
       opacity: 1;
+      border-radius: 8px;
     }
 
     .popup-header {
@@ -518,11 +522,54 @@
       }
     }
   </style>
+
+  <!-- Emergency overlay fixes: ensure main screen visible -->
+  <style>
+    /* Ensure popup overlays are usable but not blocking the entire UI */
+    .popup-overlay { display: none; background: transparent; }
+    .popup-overlay.active { display: flex; align-items: center; justify-content: center; }
+    /* Allow the popup window itself to receive pointer events when active */
+    .popup-overlay .popup-window { pointer-events: auto; }
+
+    .power-on-flash, .loading-overlay { display: none; pointer-events: none; }
+    /* Keep border flash available (visual effect) but not persistent */
+    .border-flash { display: none; pointer-events: none; }
+    /* Ensure main terminal screen is on top */
+    .c64-screen { position: relative; z-index: 1000; background: #3939C4; pointer-events: auto; }
+  </style>
+
+  <!-- Markdown renderer and sanitizer -->
+  <style>
+    /* Article / Markdown viewer: readable, not uppercase */
+    .markdown-viewer {
+      color: #EDEDED;
+      font-size: 13px;
+      line-height: 1.6;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      text-transform: none;
+      white-space: normal;
+    }
+    .markdown-viewer h1, .markdown-viewer h2, .markdown-viewer h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-weight: normal;
+      text-transform: none;
+      margin-top: 0.6em;
+      margin-bottom: 0.4em;
+      font-size: 14px;
+    }
+    .markdown-viewer p { margin: 0 0 8px 0; }
+    .markdown-viewer pre { background: rgba(0,0,0,0.12); padding:8px; overflow:auto; font-size:12px; border-radius:4px; }
+    .markdown-viewer a { color: #9BD; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 </head>
 
 <body>
   <!-- Power-on flash effect -->
   <div class="power-on-flash"></div>
+  
+
   
   <!-- Disk drive activity LED -->
   <div class="disk-activity" id="diskLED"></div>
@@ -665,6 +712,38 @@
       { title: '> WIKI', desc: 'TECHNICAL WRITEUPS & RESEARCH', url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki' }
     ];
 
+    // Fetch GitHub wiki page list via r.jina.ai and parse links
+    async function fetchWikiPages() {
+      try {
+        const wikiIndexUrl = 'https://github.com/504sarwarerror/504SARWARERROR/wiki';
+        const api = 'https://r.jina.ai/http://' + wikiIndexUrl.replace(/^https?:\/\//, '');
+        const res = await fetch(api);
+        const html = await res.text();
+
+        // Parse anchors using a regex fallback as the extracted HTML may be messy
+        const pages = [];
+        const anchorRegex = /href="(\/504sarwarerror\/504SARWARERROR\/wiki\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+        let m;
+        while ((m = anchorRegex.exec(html)) !== null) {
+          const href = m[1];
+          const title = m[2].trim();
+          const full = href.startsWith('http') ? href : ('https://github.com' + href);
+          if (!pages.some(p => p.url === full)) pages.push({ title, url: full });
+        }
+
+        // If no pages found, return null
+        if (pages.length === 0) return null;
+        return pages;
+      } catch (err) {
+        console.warn('fetchWikiPages failed', err);
+        return null;
+      }
+    }
+
+    // Remove skeleton helpers - no loading UI requested
+    function showInlineSkeleton(parent, type) { return null; }
+    function removeInlineSkeleton(parent) { return; }
+
     // Disk drive activity simulator
     function showDiskActivity(duration = 1000) {
       const led = document.getElementById('diskLED');
@@ -712,7 +791,7 @@
       await addLine(container, '', 50);
       await addLine(container, ' 64K RAM SYSTEM 38911 BASIC BYTES FREE', 100);
       await addLine(container, '', 100);
-      await addLine(container, 'READY.', 200);
+      await addLine(container, '', 200);
       await addLine(container, 'LOAD"BARTMOSS.SYS",8', 300);
       await addLine(container, '', 100);
       
@@ -722,24 +801,12 @@
 
       const loadingLine = document.createElement('div');
       loadingLine.className = 'terminal-line';
+      loadingLine.textContent = 'LOADING';
       container.appendChild(loadingLine);
+      await new Promise(resolve => setTimeout(resolve, 600));
 
-      await new Promise(resolve => {
-        let dots = '';
-        let count = 0;
-        const interval = setInterval(() => {
-          dots += '.';
-          loadingLine.textContent = 'LOADING' + dots;
-          count++;
-          if (count >= 20) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 80);
-      });
-
-      await addLine(container, 'READY.', 200);
-      await addLine(container, 'RUN', 300);
+      await addLine(container, '', 200);
+      // RUN removed
       await addLine(container, '', 100);
       
       // Add classic C64 border characters
@@ -763,7 +830,7 @@
       await addLine(container, '', 100);
       await addLine(container, '504 BLOCKS FREE.', 200);
       await addLine(container, '', 100);
-      await addLine(container, 'READY.', 200);
+      await addLine(container, '', 200);
       await addLine(container, '', 100);
       
       // Add helpful hint
@@ -790,24 +857,12 @@
       await addLine(content, 'SEARCHING FOR ABOUT.PRG', 100);
       const loadLine = document.createElement('div');
       loadLine.className = 'terminal-line';
+      loadLine.textContent = 'LOADING';
       content.appendChild(loadLine);
+      await new Promise(resolve => setTimeout(resolve, 600));
 
-      await new Promise(resolve => {
-        let dots = '';
-        let count = 0;
-        const interval = setInterval(() => {
-          dots += '.';
-          loadLine.textContent = 'LOADING' + dots;
-          count++;
-          if (count >= 15) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 60);
-      });
-
-      await addLine(content, 'READY.', 100);
-      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+      // RUN removed
       await addLine(content, '', 100);
       await addLine(content, '================================', 50);
       await addLine(content, 'SARWAR "BARTMOSS"', 50);
@@ -836,7 +891,7 @@
       content.appendChild(techBox);
 
       await addLine(content, '', 100);
-      await addLine(content, 'READY.', 100);
+      await addLine(content, '', 100);
     }
 
     async function loadProjects() {
@@ -849,24 +904,12 @@
       await addLine(content, 'SEARCHING FOR PROJECTS.PRG', 100);
       const loadLine = document.createElement('div');
       loadLine.className = 'terminal-line';
+      loadLine.textContent = 'LOADING';
       content.appendChild(loadLine);
+      await new Promise(resolve => setTimeout(resolve, 600));
 
-      await new Promise(resolve => {
-        let dots = '';
-        let count = 0;
-        const interval = setInterval(() => {
-          dots += '.';
-          loadLine.textContent = 'LOADING' + dots;
-          count++;
-          if (count >= 15) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 60);
-      });
-
-      await addLine(content, 'READY.', 100);
-      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+      // RUN removed
       await addLine(content, '', 100);
 
       for (const project of projects) {
@@ -882,53 +925,173 @@
       }
 
       await addLine(content, '', 100);
-      await addLine(content, 'READY.', 100);
+      await addLine(content, '', 100);
     }
 
     async function loadWriteups() {
       const content = document.getElementById('writeupsContent');
       content.innerHTML = '';
 
-      // Show disk activity
-      showDiskActivity(1500);
+     // Show disk activity
+     showDiskActivity(1500);
+ 
+    // No loading UI — populate list immediately
 
-      await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
-      const loadLine = document.createElement('div');
-      loadLine.className = 'terminal-line';
-      content.appendChild(loadLine);
+    await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
+    const loadLine = document.createElement('div');
+    loadLine.className = 'terminal-line';
+    content.appendChild(loadLine);
 
-      await new Promise(resolve => {
-        let dots = '';
-        let count = 0;
-        const interval = setInterval(() => {
-          dots += '.';
-          loadLine.textContent = 'LOADING' + dots;
-          count++;
-          if (count >= 15) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 60);
-      });
+    // Simple LOADING line (replaced dot-animation)
+    loadLine.textContent = 'LOADING';
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-      await addLine(content, 'READY.', 100);
-      await addLine(content, 'RUN', 100);
       await addLine(content, '', 100);
 
-      for (const writeup of writeups) {
+
+
+      // Try to fetch wiki pages dynamically and fall back to static list
+      let pages = await fetchWikiPages();
+      const listToUse = pages && pages.length ? pages : writeups.map(w => ({ title: w.title, url: w.url, desc: w.desc || '' }));
+
+      for (const writeup of listToUse) {
         const box = document.createElement('div');
         box.className = 'item-box';
-        box.onclick = () => window.open(writeup.url, '_blank');
         box.innerHTML = `
           <div class="item-title">${writeup.title}</div>
-          <div class="item-desc">${writeup.desc}</div>
+          <div class="item-desc">${writeup.desc || ''}</div>
         `;
+
+        // Clicking will embed the writeup in an iframe inside the popup.
+        // If framing is blocked, show an inline message with an extractor-rendered text view.
+        box.onclick = () => {
+          let frameContainer = document.getElementById('writeupFrameContainer');
+          if (!frameContainer) {
+            frameContainer = document.createElement('div');
+            frameContainer.id = 'writeupFrameContainer';
+            frameContainer.style.cssText = 'border:1px solid #7C71DA; margin-top:0; max-height:70vh; overflow:auto; display:block; padding:0 12px 12px 12px; background:rgba(255,255,255,0.02); border-radius:6px;';
+
+            const iframeWrapper = document.createElement('div');
+            iframeWrapper.style.cssText = 'width:100%; min-height:0;';
+
+            const iframe = document.createElement('iframe');
+            iframe.id = 'writeupFrame';
+            iframe.style.cssText = 'width:100%; height:100%; border:none; display:block; min-height:0;';
+
+            iframeWrapper.appendChild(iframe);
+            frameContainer.appendChild(iframeWrapper);
+
+            // Fallback message area (hidden by default)
+            const fallback = document.createElement('div');
+            fallback.id = 'writeupFallback';
+            fallback.style.cssText = 'padding:12px; color:#EDEDED; background:rgba(255,255,255,0.03); display:none; text-align:left;';
+            frameContainer.appendChild(fallback);
+
+            // Insert the frame container right after the clicked item for seamless layout
+            box.insertAdjacentElement('afterend', frameContainer);
+          }
+
+          // Ensure frameContainer is under the clicked item (move if it already exists)
+          box.insertAdjacentElement('afterend', frameContainer);
+
+          const iframe = document.getElementById('writeupFrame');
+          const fallback = document.getElementById('writeupFallback');
+
+          // Reset fallback
+          fallback.style.display = 'none';
+          fallback.innerHTML = '';
+
+          // Set iframe src to embed the page
+          iframe.src = writeup.url;
+          iframe.style.display = 'block';
+
+          // After a short delay, detect if framing was blocked
+          setTimeout(() => {
+            let blocked = false;
+            try {
+              const doc = iframe.contentDocument || iframe.contentWindow.document;
+              if (!doc || doc.body == null || doc.body.innerHTML.trim().length === 0) blocked = true;
+            } catch (err) {
+              blocked = true;
+            }
+
+            if (blocked) {
+              // Hide the iframe and show a friendly inline message and attempt text extraction
+              iframe.style.display = 'none';
+              fallback.style.display = 'block';
+
+const status = document.createElement('div');
+               status.id = 'extractStatus';
+                status.style.cssText = 'margin-top:0; font-size:12px; color:#CFCFE8; text-align:left; padding:0;';
+
+               status.textContent = 'Loading article text...';
+               fallback.appendChild(status);
+
+              // Use r.jina.ai text extractor: https://r.jina.ai/http/<url>
+                      const apiUrl = 'https://r.jina.ai/http://' + encodeURI(writeup.url.replace(/^https?:\/\//, ''));
+              // No skeleton — fetch and render text directly
+              const frameContainer = document.getElementById('writeupFrameContainer');
+              fetch(apiUrl).then(res => res.text()).then(text => {
+                status.style.display = 'none';
+
+                const contentText = text && text.trim().length ? text : 'No text could be extracted from this page.';
+
+                // Detect simple markdown by checking for common markdown markers
+                const looksLikeMarkdown = /(^|\n)#{1,6}\s|\*\*|\*\s|\-\s|\[.*\]\(.*\)/m.test(contentText);
+
+                const viewer = document.createElement('div');
+                viewer.style.cssText = 'color:#EDEDED; font-size:14px; overflow:auto; max-height:calc(70vh - 80px); padding:10px; background:rgba(255,255,255,0.02); border-radius:6px; line-height:1.7; text-align:left;';
+
+                if (looksLikeMarkdown && window.marked && window.DOMPurify) {
+                  // Render markdown to safe HTML
+                  const html = marked.parse(contentText);
+                  viewer.innerHTML = DOMPurify.sanitize('<div class="markdown-viewer">' + html + '</div>');
+                } else {
+                  // Plain text fallback
+                  const pre = document.createElement('pre');
+                  pre.style.cssText = 'white-space:pre-wrap; color:#EDEDED; font-size:13px; overflow:auto; max-height:calc(70vh - 80px); padding:10px; background:rgba(255,255,255,0.02); border-radius:6px;';
+                  pre.textContent = contentText;
+                  viewer.appendChild(pre);
+                }
+
+                fallback.appendChild(viewer);
+
+                // Add small "Open in new tab" button below the text
+                const openBtn2 = document.createElement('button');
+                openBtn2.textContent = 'Open original page';
+                openBtn2.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#000; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
+                openBtn2.onclick = (e) => { e.stopPropagation(); window.open(writeup.url, '_blank'); };
+                fallback.appendChild(openBtn2);
+              }).catch(err => {
+                status.textContent = 'Text extraction failed.';
+                const openBtn = document.createElement('button');
+                openBtn.textContent = 'Open in new tab';
+                openBtn.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#000; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
+                openBtn.onclick = (e) => { e.stopPropagation(); window.open(writeup.url, '_blank'); };
+                fallback.appendChild(openBtn);
+              });
+            }
+          }, 700);
+
+          // Scroll the iframe container into view
+          // Instead of scrolling the whole window, scroll the popup window content
+          const fc = document.getElementById('writeupFrameContainer');
+          const popupWindow = fc ? fc.closest('.popup-window') : null;
+          if (popupWindow && fc) {
+            // Smooth-scroll the popup's scrollTop to the frame container's offsetTop
+            const target = fc.offsetTop - 8; // small padding
+            popupWindow.scrollTo({ top: target, behavior: 'smooth' });
+          } else if (fc) {
+            fc.scrollIntoView({ behavior: 'smooth' });
+          }
+        };
+
         content.appendChild(box);
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       await addLine(content, '', 100);
-      await addLine(content, 'READY.', 100);
+      await addLine(content, '', 100);
     }
 
     async function loadLinks() {
@@ -941,24 +1104,12 @@
       await addLine(content, 'SEARCHING FOR LINKS.PRG', 100);
       const loadLine = document.createElement('div');
       loadLine.className = 'terminal-line';
+      loadLine.textContent = 'LOADING';
       content.appendChild(loadLine);
+      await new Promise(resolve => setTimeout(resolve, 600));
 
-      await new Promise(resolve => {
-        let dots = '';
-        let count = 0;
-        const interval = setInterval(() => {
-          dots += '.';
-          loadLine.textContent = 'LOADING' + dots;
-          count++;
-          if (count >= 15) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 60);
-      });
-
-      await addLine(content, 'READY.', 100);
-      await addLine(content, 'RUN', 100);
+      await addLine(content, '', 100);
+      // RUN removed
       await addLine(content, '', 100);
       await addLine(content, 'EXTERNAL RESOURCES:', 100);
       await addLine(content, '', 50);
@@ -976,7 +1127,7 @@
       }
 
       await addLine(content, '', 100);
-      await addLine(content, 'READY.', 100);
+      await addLine(content, '', 100);
     }
 
     function loadProgram(type) {
