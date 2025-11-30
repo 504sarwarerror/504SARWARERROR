@@ -54,7 +54,7 @@
       background: #3939C4;
       width: 100vw;
       height: 100vh;
-      color: #FFFFFF;
+      color: #7C71DA;
       padding: 40px 60px;
       font-size: 13px;
       text-transform: uppercase;
@@ -1202,14 +1202,14 @@
                 // Add small "Open in new tab" button below the text
                 const openBtn2 = document.createElement('button');
                 openBtn2.textContent = 'Open original page';
-                openBtn2.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#000; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
+                openBtn2.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#FFF; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
                 openBtn2.onclick = (e) => { e.stopPropagation(); window.open(writeup.url, '_blank'); };
                 fallback.appendChild(openBtn2);
               }).catch(err => {
                 status.textContent = 'Text extraction failed.';
                 const openBtn = document.createElement('button');
                 openBtn.textContent = 'Open in new tab';
-                openBtn.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#000; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
+                openBtn.style.cssText = 'margin-top:8px; padding:8px; background:#7C71DA; color:#FFF; border:none; cursor:pointer; font-family: "Press Start 2P", monospace; font-size:10px;';
                 openBtn.onclick = (e) => { e.stopPropagation(); window.open(writeup.url, '_blank'); };
                 fallback.appendChild(openBtn);
               });
