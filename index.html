@@ -29,8 +29,10 @@
 
     /* Hide scrollbar for IE, Edge and Firefox */
     * {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
     }
 
     .c64-screen {
@@ -195,7 +197,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: transparent; /* avoid full black covering */
+      background: transparent;
+      /* avoid full black covering */
       z-index: 2000;
       align-items: center;
       justify-content: center;
@@ -204,7 +207,8 @@
     .popup-overlay.active {
       display: flex;
       animation: fadeIn 0.2s;
-      background: rgba(0,0,0,0.28); /* lighter backdrop */
+      background: rgba(0, 0, 0, 0.28);
+      /* lighter backdrop */
     }
 
     .popup-window {
@@ -256,7 +260,7 @@
       z-index: 1001;
       color: #7C71DA !important;
     }
-    
+
     .popup-content .terminal-line {
       opacity: 0;
       animation: fadeIn 0.3s forwards;
@@ -376,9 +380,11 @@
       0% {
         opacity: 1;
       }
+
       50% {
         opacity: 1;
       }
+
       100% {
         opacity: 0;
         visibility: hidden;
@@ -403,9 +409,12 @@
     }
 
     @keyframes diskBlink {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 0;
       }
+
       50% {
         opacity: 1;
       }
@@ -497,9 +506,12 @@
     }
 
     @keyframes borderPulse {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 0;
       }
+
       50% {
         opacity: 1;
       }
@@ -526,16 +538,41 @@
   <!-- Emergency overlay fixes: ensure main screen visible -->
   <style>
     /* Ensure popup overlays are usable but not blocking the entire UI */
-    .popup-overlay { display: none; background: transparent; }
-    .popup-overlay.active { display: flex; align-items: center; justify-content: center; }
-    /* Allow the popup window itself to receive pointer events when active */
-    .popup-overlay .popup-window { pointer-events: auto; }
+    .popup-overlay {
+      display: none;
+      background: transparent;
+    }
 
-    .power-on-flash, .loading-overlay { display: none; pointer-events: none; }
+    .popup-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Allow the popup window itself to receive pointer events when active */
+    .popup-overlay .popup-window {
+      pointer-events: auto;
+    }
+
+    .power-on-flash,
+    .loading-overlay {
+      display: none;
+      pointer-events: none;
+    }
+
     /* Keep border flash available (visual effect) but not persistent */
-    .border-flash { display: none; pointer-events: none; }
+    .border-flash {
+      display: none;
+      pointer-events: none;
+    }
+
     /* Ensure main terminal screen is on top */
-    .c64-screen { position: relative; z-index: 1000; background: #3939C4; pointer-events: auto; }
+    .c64-screen {
+      position: relative;
+      z-index: 1000;
+      background: #3939C4;
+      pointer-events: auto;
+    }
   </style>
 
   <!-- Markdown renderer and sanitizer -->
@@ -549,7 +586,10 @@
       text-transform: none;
       white-space: normal;
     }
-    .markdown-viewer h1, .markdown-viewer h2, .markdown-viewer h3 {
+
+    .markdown-viewer h1,
+    .markdown-viewer h2,
+    .markdown-viewer h3 {
       font-family: 'Press Start 2P', monospace;
       font-weight: normal;
       text-transform: none;
@@ -557,9 +597,22 @@
       margin-bottom: 0.4em;
       font-size: 14px;
     }
-    .markdown-viewer p { margin: 0 0 8px 0; }
-    .markdown-viewer pre { background: rgba(0,0,0,0.12); padding:8px; overflow:auto; font-size:12px; border-radius:4px; }
-    .markdown-viewer a { color: #9BD; }
+
+    .markdown-viewer p {
+      margin: 0 0 8px 0;
+    }
+
+    .markdown-viewer pre {
+      background: rgba(0, 0, 0, 0.12);
+      padding: 8px;
+      overflow: auto;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .markdown-viewer a {
+      color: #9BD;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
@@ -568,9 +621,9 @@
 <body>
   <!-- Power-on flash effect -->
   <div class="power-on-flash"></div>
-  
 
-  
+
+
   <!-- Disk drive activity LED -->
   <div class="disk-activity" id="diskLED"></div>
 
@@ -702,6 +755,11 @@
         title: '[04] USERLAND ROOTKITS',
         desc: 'THE GHOST IN THE MACHINE - YOUR COMPUTER SEEMS FINE BUT SOMETHING INVISIBLE IS HIDING DEEP INSIDE YOUR SYSTEM. WATCHING. WAITING. IT CAN SPY ON YOU, STEAL YOUR DATA.',
         url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit\'s-and-the-Code-Behind-it'
+      },
+      {
+        title: '[05] SUPPLY CHAIN ATTACK',
+        desc: 'THE POISON WELL - YOU ARE DESERTED IN THE VAST DUNE, THIRSTY AND SWEAT DRIPPING DOWN YOUR FOREHEAD. YOU SEE A WELL, A NORMAL WELL, AND EXCITEDLY START DRINKING FROM IT.',
+        url: 'https://github.com/504sarwarerror/504SARWARERROR/wiki/The-Poision-Well,-Supply-Chain-Attack'
       }
     ];
 
@@ -718,21 +776,31 @@
         const wikiIndexUrl = 'https://github.com/504sarwarerror/504SARWARERROR/wiki';
         const api = 'https://r.jina.ai/http://' + wikiIndexUrl.replace(/^https?:\/\//, '');
         const res = await fetch(api);
-        const html = await res.text();
+        const text = await res.text();
 
-        // Parse anchors using a regex fallback as the extracted HTML may be messy
+        // Parse markdown links: [Title](URL)
         const pages = [];
-        const anchorRegex = /href="(\/504sarwarerror\/504SARWARERROR\/wiki\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+        // Match [Title](.../wiki/Page-Name) but exclude anchors (#) and non-wiki links
+        const linkRegex = /\[([^\]]+)\]\((https:\/\/github\.com\/504sarwarerror\/504SARWARERROR\/wiki\/[^)#\s]+)\)/gi;
+
         let m;
-        while ((m = anchorRegex.exec(html)) !== null) {
-          const href = m[1];
-          const title = m[2].trim();
-          const full = href.startsWith('http') ? href : ('https://github.com' + href);
-          if (!pages.some(p => p.url === full)) pages.push({ title, url: full });
+        while ((m = linkRegex.exec(text)) !== null) {
+          let title = m[1].trim();
+          const url = m[2];
+
+          // Clean up title (remove "Loading " prefix if present from jina output)
+          title = title.replace(/^Loading\s+/, '');
+
+          // Filter out "Home" and duplicates
+          if (title !== 'Home' && !pages.some(p => p.url === url)) {
+            pages.push({ title, url });
+          }
         }
 
         // If no pages found, return null
         if (pages.length === 0) return null;
+
+        // Return pages as is (assuming wiki list is correct order)
         return pages;
       } catch (err) {
         console.warn('fetchWikiPages failed', err);
@@ -794,7 +862,7 @@
       await addLine(container, '', 200);
       await addLine(container, 'LOAD"BARTMOSS.SYS",8', 300);
       await addLine(container, '', 100);
-      
+
       // Disk activity during search
       showDiskActivity(2000);
       await addLine(container, 'SEARCHING FOR BARTMOSS.SYS', 200);
@@ -808,7 +876,7 @@
       await addLine(container, '', 200);
       // RUN removed
       await addLine(container, '', 100);
-      
+
       // Add classic C64 border characters
       await addLine(container, 'SARWAR "BARTMOSS" TERMINAL', 100);
       await addLine(container, '', 100);
@@ -832,7 +900,7 @@
       await addLine(container, '', 100);
       await addLine(container, '', 200);
       await addLine(container, '', 100);
-      
+
       // Add helpful hint
       const hintLine = document.createElement('div');
       hintLine.className = 'terminal-line';
@@ -932,19 +1000,19 @@
       const content = document.getElementById('writeupsContent');
       content.innerHTML = '';
 
-     // Show disk activity
-     showDiskActivity(1500);
- 
-    // No loading UI — populate list immediately
+      // Show disk activity
+      showDiskActivity(1500);
 
-    await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
-    const loadLine = document.createElement('div');
-    loadLine.className = 'terminal-line';
-    content.appendChild(loadLine);
+      // No loading UI — populate list immediately
 
-    // Simple LOADING line (replaced dot-animation)
-    loadLine.textContent = 'LOADING';
-    await new Promise(resolve => setTimeout(resolve, 600));
+      await addLine(content, 'SEARCHING FOR WRITEUPS.PRG', 100);
+      const loadLine = document.createElement('div');
+      loadLine.className = 'terminal-line';
+      content.appendChild(loadLine);
+
+      // Simple LOADING line (replaced dot-animation)
+      loadLine.textContent = 'LOADING';
+      await new Promise(resolve => setTimeout(resolve, 600));
 
       await addLine(content, '', 100);
 
@@ -957,7 +1025,12 @@
       for (const writeup of listToUse) {
         const box = document.createElement('div');
         box.className = 'item-box';
+
+        // Generate screenshot URL using thum.io
+        const screenshotUrl = `https://image.thum.io/get/width/400/crop/600/noanimate/${encodeURIComponent(writeup.url)}`;
+
         box.innerHTML = `
+          <img src="${screenshotUrl}" alt="Preview" style="width:100%; height:auto; border-radius:4px; margin-bottom:10px; display:block; background:#1a1a2e;" onerror="this.style.display='none'">
           <div class="item-title">${writeup.title}</div>
           <div class="item-desc">${writeup.desc || ''}</div>
         `;
@@ -1020,21 +1093,76 @@
               iframe.style.display = 'none';
               fallback.style.display = 'block';
 
-const status = document.createElement('div');
-               status.id = 'extractStatus';
-                status.style.cssText = 'margin-top:0; font-size:12px; color:#CFCFE8; text-align:left; padding:0;';
+              const status = document.createElement('div');
+              status.id = 'extractStatus';
+              status.style.cssText = 'margin-top:0; font-size:12px; color:#CFCFE8; text-align:left; padding:0;';
 
-               status.textContent = 'Loading article text...';
-               fallback.appendChild(status);
+              status.textContent = 'Loading article text...';
+              fallback.appendChild(status);
 
-              // Use r.jina.ai text extractor: https://r.jina.ai/http/<url>
-                      const apiUrl = 'https://r.jina.ai/http://' + encodeURI(writeup.url.replace(/^https?:\/\//, ''));
+              // Use r.jina.ai text extractor with selector to get only the content
+              // We target .markdown-body to avoid nav/footer, but fallback to body if needed
+              const apiUrl = 'https://r.jina.ai/http://' + encodeURI(writeup.url.replace(/^https?:\/\//, '')) + '?selector=.markdown-body,body';
               // No skeleton — fetch and render text directly
               const frameContainer = document.getElementById('writeupFrameContainer');
+
+              // Helper to clean up text - AGGRESSIVE cleanup
+              const cleanText = (text) => {
+                let cleaned = text;
+
+                // Remove jina.ai metadata headers
+                cleaned = cleaned.replace(/^Title:.*$/gm, '');
+                cleaned = cleaned.replace(/^URL Source:.*$/gm, '');
+                cleaned = cleaned.replace(/^Markdown Content:.*$/gm, '');
+                cleaned = cleaned.replace(/^=+$/gm, '');
+
+                // Remove everything before the actual content starts
+                // Look for the article title and start from there
+                const lines = cleaned.split('\n');
+                let startIndex = -1;
+
+                // Find where actual content starts (after all the navigation)
+                for (let i = 0; i < lines.length; i++) {
+                  const line = lines[i].trim();
+                  // Look for common article start patterns
+                  if (line.match(/^(The Well|You are deserted|Spitting out|What If Your|The Strings|The Invisible)/i)) {
+                    startIndex = i;
+                    break;
+                  }
+                  // Or look for the first heading after metadata
+                  if (i > 50 && line.match(/^#{1,3}\s+\w/)) {
+                    startIndex = i;
+                    break;
+                  }
+                }
+
+                if (startIndex > 0) {
+                  cleaned = lines.slice(startIndex).join('\n');
+                }
+
+                // Remove footer junk - everything after "Toggle table of contents"
+                if (cleaned.includes('Toggle table of contents')) {
+                  cleaned = cleaned.split('Toggle table of contents')[0];
+                } else if (cleaned.includes('Clone this wiki locally')) {
+                  cleaned = cleaned.split('Clone this wiki locally')[0];
+                } else if (cleaned.includes('Footer')) {
+                  cleaned = cleaned.split('Footer')[0];
+                }
+
+                // Final cleanup of any remaining navigation fragments
+                cleaned = cleaned.replace(/Skip to content[\s\S]*?Insights/i, '');
+                cleaned = cleaned.replace(/Jump to bottom/gi, '');
+                cleaned = cleaned.replace(/edited this page.*?revision/gi, '');
+                cleaned = cleaned.replace(/Loading (Home|ATM|Basic|Discord|The Poision|Userland)/gi, '');
+
+                return cleaned.trim();
+              };
+
               fetch(apiUrl).then(res => res.text()).then(text => {
                 status.style.display = 'none';
 
-                const contentText = text && text.trim().length ? text : 'No text could be extracted from this page.';
+                let contentText = text && text.trim().length ? text : 'No text could be extracted from this page.';
+                contentText = cleanText(contentText);
 
                 // Detect simple markdown by checking for common markdown markers
                 const looksLikeMarkdown = /(^|\n)#{1,6}\s|\*\*|\*\s|\-\s|\[.*\]\(.*\)/m.test(contentText);
@@ -1147,11 +1275,11 @@ const status = document.createElement('div');
     // Konami Code Easter Egg
     let konamiCode = [];
     const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-    
+
     function checkKonamiCode(key) {
       konamiCode.push(key);
       konamiCode.splice(-konamiSequence.length - 1, konamiCode.length - konamiSequence.length);
-      
+
       if (konamiCode.join(',').includes(konamiSequence.join(','))) {
         const egg = document.getElementById('easterEgg');
         const border = document.getElementById('borderFlash');
@@ -1183,14 +1311,14 @@ const status = document.createElement('div');
       const border = document.getElementById('borderFlash');
       const container = document.getElementById('bootSequence');
       const commandLine = document.getElementById('commandLine');
-      
+
       // Clear the command display
       currentCommand = '';
       if (commandLine) {
         commandLine.textContent = '';
         commandLine.classList.remove('active');
       }
-      
+
       // Add command to screen
       const commandEcho = document.createElement('div');
       commandEcho.className = 'terminal-line';
@@ -1199,8 +1327,8 @@ const status = document.createElement('div');
       if (cursorLine && cursorLine.parentNode) {
         cursorLine.parentNode.insertBefore(commandEcho, cursorLine);
       }
-      
-      switch(cmd) {
+
+      switch (cmd) {
         case 'HELP':
         case '?':
           const helpText = document.createElement('div');
@@ -1254,7 +1382,7 @@ const status = document.createElement('div');
             }
           }
       }
-      
+
       // Scroll to bottom
       window.scrollTo(0, document.body.scrollHeight);
     }
@@ -1275,7 +1403,7 @@ const status = document.createElement('div');
       if (e.key === 'Escape') {
         const egg = document.getElementById('easterEgg');
         egg.classList.remove('show');
-        
+
         document.querySelectorAll('.popup-overlay').forEach(overlay => {
           overlay.classList.remove('active');
         });
