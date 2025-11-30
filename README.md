@@ -130,10 +130,10 @@ compilation of write-ups about malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://github.com/504sarwarerror/504SARWARERROR/wiki/Userland-Rootkit's-and-the-Code-Behind-it">Userland Rootkit's and the Code Behind it</a>
+        <a href="https://totallynotabackdoor.site/">More of my Write Ups</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
-how a rootkit works and the code behind it
+        i have more to read on my website
       </td>
     </tr>
   </tbody>
