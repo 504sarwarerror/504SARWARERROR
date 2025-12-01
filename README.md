@@ -130,7 +130,7 @@ compilation of write-ups about malware development
 
   <tr>
       <td style="vertical-align: top; padding: 10px;">
-        <a href="https://totallynotabackdoor.site/">More of my Write Ups</a>
+        <a href="https://totallynotabackdoor.site/">MORE OF MY WRITE-UPS</a>
       </td>
       <td style="vertical-align: top; padding: 10px;">
         i have more to read on my website
